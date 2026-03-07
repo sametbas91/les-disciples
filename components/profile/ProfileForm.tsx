@@ -32,15 +32,49 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
   const [convertedFile, setConvertedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  function compressImage(file: File, maxSize: number, quality: number): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img')
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        let { width, height } = img
+        if (width > maxSize || height > maxSize) {
+          const ratio = Math.min(maxSize / width, maxSize / height)
+          width = Math.round(width * ratio)
+          height = Math.round(height * ratio)
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error('Compression failed'))
+            const name = file.name.replace(/\.[^.]+$/, '.jpg')
+            resolve(new File([blob], name, { type: 'image/jpeg' }))
+          },
+          'image/jpeg',
+          quality
+        )
+      }
+      img.onerror = reject
+      img.src = url
+    })
+  }
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     let file = e.target.files?.[0]
     if (!file) return
+
+    const originalSize = file.size
+    setConverting(true)
 
     const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
       || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
 
     if (isHeic) {
-      setConverting(true)
       try {
         const heic2any = (await import('heic2any')).default
         const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 }) as Blob
@@ -50,9 +84,18 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
         setConverting(false)
         return
       }
-      setConverting(false)
     }
 
+    try {
+      file = await compressImage(file, 800, 0.8)
+      console.log(`Avatar: ${(originalSize / 1024 / 1024).toFixed(2)} MB -> ${(file.size / 1024 / 1024).toFixed(2)} MB`)
+    } catch {
+      setMessage('Erreur lors de la compression.')
+      setConverting(false)
+      return
+    }
+
+    setConverting(false)
     setConvertedFile(file)
     const reader = new FileReader()
     reader.onloadend = () => setAvatarPreview(reader.result as string)
