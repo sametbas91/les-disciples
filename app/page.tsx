@@ -1,103 +1,173 @@
-import Image from "next/image";
+import { getServiceSupabase } from '@/lib/supabase'
+import { formatDuration, formatDate, daysUntilBirthday, getNextSunday } from '@/lib/utils'
+import KPICard from '@/components/dashboard/KPICard'
+import AttendanceChart from '@/components/dashboard/AttendanceChart'
+import DonutChart from '@/components/dashboard/DonutChart'
+import BirthdayWidget from '@/components/dashboard/BirthdayWidget'
+import Link from 'next/link'
+import { Calendar, Clock, Users, BookOpen, Target, TrendingUp, ExternalLink } from 'lucide-react'
 
-export default function Home() {
+export const dynamic = 'force-dynamic'
+
+export default async function DashboardPage() {
+  const db = getServiceSupabase()
+
+  const [
+    { data: sessions },
+    { data: members },
+    { data: attendances },
+  ] = await Promise.all([
+    db.from('sessions').select('*').order('date', { ascending: true }),
+    db.from('members').select('*'),
+    db.from('attendances').select('*, member:members(*)'),
+  ])
+
+  const totalSessions = sessions?.length || 0
+  const disciples = members?.filter((m) => m.status === 'Disciple') || []
+  const invites = members?.filter((m) => m.status === 'Invit\u00e9(e)') || []
+  const totalDuration = sessions?.reduce((sum, s) => sum + s.duration, 0) || 0
+
+  const uniqueParticipants = new Set(attendances?.map((a) => a.member_id)).size
+
+  // Taux de fidelite
+  const memberAttendanceCounts = new Map<string, number>()
+  attendances?.forEach((a) => {
+    memberAttendanceCounts.set(a.member_id, (memberAttendanceCounts.get(a.member_id) || 0) + 1)
+  })
+  const avgFidelity = totalSessions > 0 && memberAttendanceCounts.size > 0
+    ? Math.round(
+        (Array.from(memberAttendanceCounts.values()).reduce((s, c) => s + c, 0) /
+          memberAttendanceCounts.size /
+          totalSessions) *
+          100
+      )
+    : 0
+
+  // Chart data
+  const chartData = sessions?.map((s) => {
+    const sessionAttendances = attendances?.filter((a) => a.session_id === s.id) || []
+    const discipleCount = sessionAttendances.filter((a) => a.member?.status === 'Disciple').length
+    const inviteCount = sessionAttendances.filter((a) => a.member?.status !== 'Disciple').length
+    return {
+      date: new Date(s.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+      Disciples: discipleCount,
+      'Invit\u00e9s': inviteCount,
+      Total: sessionAttendances.length,
+    }
+  }) || []
+
+  // Birthdays
+  const membersWithBirthday = members
+    ?.filter((m) => m.birthday)
+    .map((m) => ({
+      ...m,
+      daysUntil: daysUntilBirthday(m.birthday!),
+    }))
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 3) || []
+
+  // Last session
+  const lastSession = sessions?.[sessions.length - 1]
+  const lastSessionAttendances = lastSession
+    ? attendances?.filter((a) => a.session_id === lastSession.id) || []
+    : []
+
+  // Nouveaux ce mois
+  const now = new Date()
+  const firstTimers = attendances?.filter((a) => {
+    if (!a.is_first_time) return false
+    const session = sessions?.find((s) => s.id === a.session_id)
+    if (!session) return false
+    const sDate = new Date(session.date)
+    return sDate.getMonth() === now.getMonth() && sDate.getFullYear() === now.getFullYear()
+  }) || []
+
+  const nextSunday = getNextSunday()
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+    <div className="space-y-8">
+      {/* Banner */}
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
+        <h1 className="text-2xl sm:text-4xl font-bold text-primary mb-2">
+          Les Disciples
+        </h1>
+        <p className="text-muted text-sm sm:text-base mb-4">
+          Groupe de jeunes hommes du RGL d&apos;AP Samuel qui veulent vivre et d&eacute;montrer Christ &agrave; leur g&eacute;n&eacute;ration.
+        </p>
+        <div className="flex flex-wrap gap-4 text-sm">
+          <div className="flex items-center gap-2 text-foreground">
+            <Calendar size={16} className="text-primary" />
+            <span>Prochaine session : Dimanche {nextSunday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} &agrave; 21h00</span>
+          </div>
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://meet.google.com/ppe-fwcd-sbr"
             target="_blank"
             rel="noopener noreferrer"
+            className="flex items-center gap-2 text-primary hover:text-primary-light transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+            <ExternalLink size={16} />
+            Rejoindre le Meet
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <KPICard icon={<BookOpen size={20} />} label="Sessions" value={totalSessions} />
+        <KPICard icon={<Users size={20} />} label="Participants uniques" value={uniqueParticipants} />
+        <KPICard icon={<Target size={20} />} label="Disciples" value={disciples.length} color="text-disciple" />
+        <KPICard icon={<Users size={20} />} label="Invit&eacute;s" value={invites.length} color="text-invite" />
+        <KPICard icon={<Clock size={20} />} label="Heures totales" value={`${Math.round(totalDuration / 60)}h`} />
+        <KPICard icon={<TrendingUp size={20} />} label="Fid&eacute;lit&eacute;" value={`${avgFidelity}%`} />
+      </div>
+
+      {/* Charts */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 bg-card border border-border rounded-2xl p-6">
+          <h2 className="text-lg font-semibold mb-4">Participation par session</h2>
+          <AttendanceChart data={chartData} />
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h2 className="text-lg font-semibold mb-4">R&eacute;partition</h2>
+          <DonutChart disciples={disciples.length} invites={invites.length} />
+        </div>
+      </div>
+
+      {/* Bottom row */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Birthdays */}
+        <BirthdayWidget members={membersWithBirthday} />
+
+        {/* Last session */}
+        {lastSession && (
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-4">Derni&egrave;re session</h2>
+            <Link href={`/sessions/${lastSession.id}`} className="block hover:bg-card-hover rounded-xl p-3 -m-3 transition-colors">
+              <p className="text-primary font-medium">{lastSession.theme}</p>
+              <p className="text-muted text-sm mt-1">{formatDate(lastSession.date)}</p>
+              <div className="flex gap-4 mt-2 text-sm text-muted">
+                <span>{formatDuration(lastSession.duration)}</span>
+                <span>{lastSessionAttendances.length} pr&eacute;sents</span>
+              </div>
+            </Link>
+          </div>
+        )}
+
+        {/* Nouveaux ce mois */}
+        {firstTimers.length > 0 && (
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-4">Nouveaux ce mois-ci</h2>
+            <div className="space-y-2">
+              {firstTimers.map((a) => (
+                <div key={a.id} className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-nouveau" />
+                  <span className="text-sm">{a.member?.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  );
+  )
 }
