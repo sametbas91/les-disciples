@@ -170,6 +170,75 @@ export async function deleteComment(commentId: string, sessionId: string) {
   revalidatePath(`/sessions/${sessionId}`)
 }
 
+// PROFILES
+export async function saveProfile(formData: FormData) {
+  const user = await currentUser()
+  if (!user) throw new Error('Connexion requise')
+
+  const db = getServiceSupabase()
+
+  const first_name = formData.get('first_name') as string || null
+  const last_name = formData.get('last_name') as string || null
+  const birth_date = formData.get('birth_date') as string || null
+  const address = formData.get('address') as string || null
+  const city = formData.get('city') as string || null
+  const country = formData.get('country') as string || null
+  const bio = formData.get('bio') as string || null
+
+  // Geocode address
+  let latitude: number | null = null
+  let longitude: number | null = null
+
+  const addressParts = [address, city, country].filter(Boolean).join(', ')
+  if (addressParts) {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressParts)}&limit=1`,
+        { headers: { 'User-Agent': 'LesDisciplesApp/1.0' } }
+      )
+      const data = await res.json()
+      if (data.length > 0) {
+        latitude = parseFloat(data[0].lat)
+        longitude = parseFloat(data[0].lon)
+      }
+    } catch {
+      // Geocoding failed silently
+    }
+  }
+
+  const profileData = {
+    user_id: user.id,
+    first_name,
+    last_name,
+    birth_date: birth_date || null,
+    address,
+    city,
+    country,
+    latitude,
+    longitude,
+    bio,
+    avatar_url: user.imageUrl,
+    updated_at: new Date().toISOString(),
+  }
+
+  const { data: existing } = await db
+    .from('profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (existing) {
+    const { error } = await db.from('profiles').update(profileData).eq('user_id', user.id)
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await db.from('profiles').insert(profileData)
+    if (error) throw new Error(error.message)
+  }
+
+  revalidatePath('/profil')
+  revalidatePath('/')
+}
+
 // ATTENDANCE
 export async function removeAttendance(sessionId: string, memberId: string) {
   await requireAdmin()

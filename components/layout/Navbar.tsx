@@ -11,6 +11,7 @@ const links = [
   { href: '/', label: 'Dashboard' },
   { href: '/sessions', label: 'Sessions' },
   { href: '/membres', label: 'Membres' },
+  { href: '/profil', label: 'Profil' },
   { href: '/admin', label: 'Admin' },
 ]
 

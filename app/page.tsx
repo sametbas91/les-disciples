@@ -5,7 +5,9 @@ import AttendanceChart from '@/components/dashboard/AttendanceChart'
 import DonutChart from '@/components/dashboard/DonutChart'
 import BirthdayWidget from '@/components/dashboard/BirthdayWidget'
 import Link from 'next/link'
-import { Calendar, Clock, Users, BookOpen, Target, TrendingUp, ExternalLink } from 'lucide-react'
+import MembersMapWrapper from '@/components/dashboard/MembersMapWrapper'
+import AgeChart from '@/components/dashboard/AgeChart'
+import { Calendar, Clock, Users, BookOpen, Target, TrendingUp, ExternalLink, MapPin } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +18,12 @@ export default async function DashboardPage() {
     { data: sessions },
     { data: members },
     { data: attendances },
+    { data: profiles },
   ] = await Promise.all([
     db.from('sessions').select('*').order('date', { ascending: true }),
     db.from('members').select('*'),
     db.from('attendances').select('*, member:members(*)'),
+    db.from('profiles').select('first_name, last_name, city, country, latitude, longitude, avatar_url, birth_date'),
   ])
 
   const totalSessions = sessions?.length || 0
@@ -82,6 +86,24 @@ export default async function DashboardPage() {
     return sDate.getMonth() === now.getMonth() && sDate.getFullYear() === now.getFullYear()
   }) || []
 
+  // Age distribution from profiles
+  const ageTranches = [
+    { tranche: '-18', min: 0, max: 17 },
+    { tranche: '18-25', min: 18, max: 25 },
+    { tranche: '26-30', min: 26, max: 30 },
+    { tranche: '31-40', min: 31, max: 40 },
+    { tranche: '40+', min: 41, max: 200 },
+  ]
+  const now2 = new Date()
+  const ageData = ageTranches.map(({ tranche, min, max }) => ({
+    tranche,
+    count: (profiles || []).filter((p) => {
+      if (!p.birth_date) return false
+      const age = Math.floor((now2.getTime() - new Date(p.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+      return age >= min && age <= max
+    }).length,
+  }))
+
   const nextSunday = getNextSunday()
 
   return (
@@ -131,6 +153,21 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold mb-4">R&eacute;partition</h2>
           <DonutChart disciples={disciples.length} invites={invites.length} />
         </div>
+      </div>
+
+      {/* Members Map */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <MapPin size={20} className="text-primary" />
+          Ou sont nos membres ?
+        </h2>
+        <MembersMapWrapper profiles={(profiles || []).filter((p) => p.latitude && p.longitude) as { first_name: string | null; last_name: string | null; city: string | null; country: string | null; latitude: number; longitude: number; avatar_url: string | null }[]} />
+      </div>
+
+      {/* Age Distribution */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h2 className="text-lg font-semibold mb-4">Repartition des ages</h2>
+        <AgeChart data={ageData} />
       </div>
 
       {/* Bottom row */}

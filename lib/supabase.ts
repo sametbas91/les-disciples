@@ -37,6 +37,23 @@ export type Attendance = {
   member?: Member
 }
 
+export type Profile = {
+  id: string
+  user_id: string
+  first_name: string | null
+  last_name: string | null
+  birth_date: string | null
+  address: string | null
+  city: string | null
+  country: string | null
+  latitude: number | null
+  longitude: number | null
+  bio: string | null
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type Comment = {
   id: string
   session_id: string

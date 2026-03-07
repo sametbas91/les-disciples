@@ -62,12 +62,15 @@ export default async function AdminPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <Link href="/sessions/new" className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary/30 transition-colors">
           <p className="text-primary font-medium">+ Nouvelle session</p>
         </Link>
         <Link href="/membres" className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary/30 transition-colors">
           <p className="text-primary font-medium">G&eacute;rer les membres</p>
+        </Link>
+        <Link href="/admin/profils" className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary/30 transition-colors">
+          <p className="text-primary font-medium">Voir les profils</p>
         </Link>
       </div>
     </div>
