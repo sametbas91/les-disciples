@@ -1,4 +1,4 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { getServiceSupabase } from '@/lib/supabase'
 import ProfileForm from '@/components/profile/ProfileForm'
@@ -25,7 +25,6 @@ export default async function ProfilPage() {
           id: user.id,
           firstName: user.firstName || '',
           lastName: user.lastName || '',
-          imageUrl: user.imageUrl,
         }}
       />
     </div>

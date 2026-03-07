@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'img.clerk.com' },
       { protocol: 'https', hostname: '*.clerk.accounts.dev' },
+      { protocol: 'https', hostname: 'yyfujjkmzhxqhpdtbxda.supabase.co' },
     ],
   },
 };

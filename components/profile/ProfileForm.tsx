@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { saveProfile } from '@/lib/actions'
-import { Save, Loader2 } from 'lucide-react'
+import { Save, Loader2, Camera } from 'lucide-react'
 import Image from 'next/image'
 
 type Profile = {
@@ -22,12 +22,22 @@ type ClerkUser = {
   id: string
   firstName: string
   lastName: string
-  imageUrl: string
 }
 
 export default function ProfileForm({ profile, clerkUser }: { profile: Profile; clerkUser: ClerkUser }) {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => setAvatarPreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -44,25 +54,43 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
     }
   }
 
-  const avatarUrl = profile?.avatar_url || clerkUser.imageUrl
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Avatar */}
+      {/* Avatar Upload */}
       <div className="flex items-center gap-4">
-        {avatarUrl && (
-          <Image
-            src={avatarUrl}
-            alt="Photo de profil"
-            width={80}
-            height={80}
-            className="rounded-full border-2 border-primary"
-          />
-        )}
-        <div>
-          <p className="text-sm text-muted">Photo de profil Clerk</p>
-          <p className="text-xs text-muted">Modifiable depuis les parametres Clerk</p>
+        <div
+          className="relative w-20 h-20 rounded-full border-2 border-primary overflow-hidden bg-card-hover cursor-pointer group"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {avatarPreview ? (
+            <Image src={avatarPreview} alt="Photo de profil" fill className="object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted">
+              <Camera size={24} />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <Camera size={20} className="text-white" />
+          </div>
         </div>
+        <div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="text-sm text-primary hover:text-primary-light transition-colors"
+          >
+            Changer la photo
+          </button>
+          <p className="text-xs text-muted mt-1">JPG, PNG. Max 2 Mo.</p>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          name="avatar"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

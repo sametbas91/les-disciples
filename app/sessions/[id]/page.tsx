@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function SessionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { sessionClaims } = await auth()
+  const { sessionClaims, userId } = await auth()
   const isAdmin = sessionClaims?.metadata?.role === 'admin'
   const db = getServiceSupabase()
 
@@ -30,6 +30,21 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
     .select('*')
     .eq('session_id', id)
     .order('created_at', { ascending: true })
+
+  const { data: commentLikes } = await db
+    .from('comment_likes')
+    .select('*')
+    .in('comment_id', (comments || []).map((c) => c.id))
+
+  const enrichedComments = (comments || []).map((c) => {
+    const likes = (commentLikes || []).filter((l) => l.comment_id === c.id)
+    return {
+      ...c,
+      parent_id: c.parent_id || null,
+      likes_count: likes.length,
+      user_has_liked: userId ? likes.some((l) => l.user_id === userId) : false,
+    }
+  })
 
   const discipleAttendances = attendances?.filter((a) => a.member?.status === 'Disciple') || []
   const inviteAttendances = attendances?.filter((a) => a.member?.status !== 'Disciple') || []
@@ -90,7 +105,7 @@ Total presents : ${attendances?.length || 0}`
       {/* Comments */}
       <CommentSection
         sessionId={session.id}
-        comments={comments || []}
+        comments={enrichedComments}
         isAdmin={isAdmin}
       />
     </div>

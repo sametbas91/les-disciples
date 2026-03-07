@@ -3,7 +3,7 @@
 CREATE TABLE members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
-  status text CHECK (status IN ('Disciple', 'Invité(e)')) NOT NULL,
+  status text CHECK (status IN ('Berger', 'Disciple', 'Invité(e)')) NOT NULL,
   birthday date,
   created_at timestamptz DEFAULT now()
 );

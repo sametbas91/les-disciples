@@ -155,15 +155,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Members Map */}
-      <div className="bg-card border border-border rounded-2xl p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <MapPin size={20} className="text-primary" />
-          Ou sont nos membres ?
-        </h2>
-        <MembersMapWrapper profiles={(profiles || []).filter((p) => p.latitude && p.longitude) as { first_name: string | null; last_name: string | null; city: string | null; country: string | null; latitude: number; longitude: number; avatar_url: string | null }[]} />
-      </div>
-
       {/* Age Distribution */}
       <div className="bg-card border border-border rounded-2xl p-6">
         <h2 className="text-lg font-semibold mb-4">Repartition des ages</h2>
@@ -202,6 +193,27 @@ export default async function DashboardPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Members Map - bottom */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <MapPin size={20} className="text-primary" />
+          Ou sont nos membres ?
+        </h2>
+        {(profiles || []).some((p) => p.latitude && p.longitude) ? (
+          <MembersMapWrapper profiles={(profiles || []).filter((p) => p.latitude && p.longitude) as { first_name: string | null; last_name: string | null; city: string | null; country: string | null; latitude: number; longitude: number; avatar_url: string | null }[]} />
+        ) : (
+          <div className="h-[300px] rounded-xl bg-card-hover border border-border flex flex-col items-center justify-center gap-3">
+            <MapPin size={40} className="text-muted" />
+            <p className="text-muted text-sm text-center max-w-xs">
+              Aucun membre n&apos;a encore partage sa localisation. Remplis ton profil pour apparaitre sur la carte !
+            </p>
+            <a href="/profil" className="text-primary text-sm hover:text-primary-light transition-colors">
+              Completer mon profil
+            </a>
           </div>
         )}
       </div>

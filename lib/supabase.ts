@@ -15,7 +15,7 @@ export function getServiceSupabase() {
 export type Member = {
   id: string
   name: string
-  status: 'Disciple' | 'Invité(e)'
+  status: 'Berger' | 'Disciple' | 'Invité(e)'
   birthday: string | null
   created_at: string
 }
@@ -60,5 +60,13 @@ export type Comment = {
   author_name: string
   author_id: string | null
   content: string
+  parent_id: string | null
+  created_at: string
+}
+
+export type CommentLike = {
+  id: string
+  comment_id: string
+  user_id: string
   created_at: string
 }

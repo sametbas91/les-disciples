@@ -21,11 +21,12 @@ export default function MembersList({
   totalSessions: number
 }) {
   const [showForm, setShowForm] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'Disciple' | 'Invité(e)'>('all')
+  const [filter, setFilter] = useState<'all' | 'Berger' | 'Disciple' | 'Invité(e)'>('all')
 
   const filtered = filter === 'all' ? members : members.filter((m) => m.status === filter)
+  const bergers = filtered.filter((m) => m.status === 'Berger')
   const disciples = filtered.filter((m) => m.status === 'Disciple')
-  const invites = filtered.filter((m) => m.status !== 'Disciple')
+  const invites = filtered.filter((m) => m.status === 'Invité(e)')
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -34,10 +35,13 @@ export default function MembersList({
     setShowForm(false)
   }
 
-  const handleStatusToggle = async (m: MemberWithStats) => {
+  const [statusMenuId, setStatusMenuId] = useState<string | null>(null)
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
     const fd = new FormData()
-    fd.set('status', m.status === 'Disciple' ? 'Invité(e)' : 'Disciple')
-    await updateMember(m.id, fd)
+    fd.set('status', newStatus)
+    await updateMember(id, fd)
+    setStatusMenuId(null)
   }
 
   const handleDelete = async (id: string) => {
@@ -51,7 +55,10 @@ export default function MembersList({
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="font-medium">{m.name}</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${m.status === 'Disciple' ? 'bg-disciple/20 text-disciple' : 'bg-invite/20 text-invite'}`}>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${
+            m.status === 'Berger' ? 'bg-primary/20 text-primary' :
+            m.status === 'Disciple' ? 'bg-disciple/20 text-disciple' : 'bg-invite/20 text-invite'
+          }`}>
             {m.status}
           </span>
           {m.isNew && (
@@ -75,13 +82,26 @@ export default function MembersList({
         </div>
       </div>
       {isAdmin && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative">
           <button
-            onClick={() => handleStatusToggle(m)}
+            onClick={() => setStatusMenuId(statusMenuId === m.id ? null : m.id)}
             className="text-xs bg-card border border-border px-2 py-1 rounded-lg hover:border-primary transition-colors"
           >
-            {m.status === 'Disciple' ? 'Passer Invite' : 'Passer Disciple'}
+            Changer statut
           </button>
+          {statusMenuId === m.id && (
+            <div className="absolute right-12 top-0 z-10 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+              {['Berger', 'Disciple', 'Invité(e)'].filter((s) => s !== m.status).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleStatusChange(m.id, s)}
+                  className="block w-full text-left px-3 py-1.5 text-xs hover:bg-card-hover transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
           <button onClick={() => handleDelete(m.id)} className="text-muted hover:text-red-400">
             <Trash2 size={14} />
           </button>
@@ -94,7 +114,7 @@ export default function MembersList({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex gap-2">
-          {(['all', 'Disciple', 'Invité(e)'] as const).map((f) => (
+          {(['all', 'Berger', 'Disciple', 'Invité(e)'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -102,7 +122,7 @@ export default function MembersList({
                 filter === f ? 'bg-primary text-background' : 'bg-card-hover text-muted hover:text-foreground'
               }`}
             >
-              {f === 'all' ? 'Tous' : f === 'Disciple' ? 'Disciples' : 'Invites'}
+              {f === 'all' ? 'Tous' : f === 'Berger' ? 'Bergers' : f === 'Disciple' ? 'Disciples' : 'Invites'}
             </button>
           ))}
         </div>
@@ -126,8 +146,9 @@ export default function MembersList({
           <div>
             <label className="block text-xs text-muted mb-1">Statut</label>
             <select name="status" className="bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none">
+              <option value="Berger">Berger</option>
               <option value="Disciple">Disciple</option>
-              <option value="Invit&eacute;(e)">Invite(e)</option>
+              <option value="Invité(e)">Invite(e)</option>
             </select>
           </div>
           <div>
@@ -138,8 +159,15 @@ export default function MembersList({
         </form>
       )}
 
-      {filter === 'all' || filter === 'Disciple' ? (
+      {(filter === 'all' || filter === 'Berger') && bergers.length > 0 ? (
         <div>
+          <h3 className="text-sm font-medium text-primary mb-2">Bergers ({bergers.length})</h3>
+          <div className="space-y-2">{bergers.map(renderMember)}</div>
+        </div>
+      ) : null}
+
+      {filter === 'all' || filter === 'Disciple' ? (
+        <div className="mt-4">
           <h3 className="text-sm font-medium text-disciple mb-2">Disciples ({disciples.length})</h3>
           <div className="space-y-2">{disciples.map(renderMember)}</div>
         </div>

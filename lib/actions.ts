@@ -132,7 +132,7 @@ export async function deleteMember(id: string) {
 }
 
 // COMMENTS
-export async function addComment(sessionId: string, content: string) {
+export async function addComment(sessionId: string, content: string, parentId?: string) {
   const user = await currentUser()
   if (!user) throw new Error('Connexion requise')
 
@@ -146,9 +146,32 @@ export async function addComment(sessionId: string, content: string) {
     author_name: authorName,
     author_id: user.id,
     content,
+    parent_id: parentId || null,
   })
 
   if (error) throw new Error(error.message)
+  revalidatePath(`/sessions/${sessionId}`)
+}
+
+export async function toggleCommentLike(commentId: string, sessionId: string) {
+  const user = await currentUser()
+  if (!user) throw new Error('Connexion requise')
+
+  const db = getServiceSupabase()
+
+  const { data: existing } = await db
+    .from('comment_likes')
+    .select('id')
+    .eq('comment_id', commentId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (existing) {
+    await db.from('comment_likes').delete().eq('id', existing.id)
+  } else {
+    await db.from('comment_likes').insert({ comment_id: commentId, user_id: user.id })
+  }
+
   revalidatePath(`/sessions/${sessionId}`)
 }
 
@@ -184,6 +207,23 @@ export async function saveProfile(formData: FormData) {
   const city = formData.get('city') as string || null
   const country = formData.get('country') as string || null
   const bio = formData.get('bio') as string || null
+  const avatarFile = formData.get('avatar') as File | null
+
+  // Upload avatar to Supabase Storage if provided
+  let avatar_url: string | undefined = undefined
+  if (avatarFile && avatarFile.size > 0) {
+    const ext = avatarFile.name.split('.').pop() || 'jpg'
+    const filePath = `${user.id}/avatar.${ext}`
+
+    const { error: uploadError } = await db.storage
+      .from('avatars')
+      .upload(filePath, avatarFile, { upsert: true })
+
+    if (!uploadError) {
+      const { data: publicUrl } = db.storage.from('avatars').getPublicUrl(filePath)
+      avatar_url = `${publicUrl.publicUrl}?t=${Date.now()}`
+    }
+  }
 
   // Geocode address
   let latitude: number | null = null
@@ -206,7 +246,7 @@ export async function saveProfile(formData: FormData) {
     }
   }
 
-  const profileData = {
+  const profileData: Record<string, unknown> = {
     user_id: user.id,
     first_name,
     last_name,
@@ -217,8 +257,11 @@ export async function saveProfile(formData: FormData) {
     latitude,
     longitude,
     bio,
-    avatar_url: user.imageUrl,
     updated_at: new Date().toISOString(),
+  }
+
+  if (avatar_url !== undefined) {
+    profileData.avatar_url = avatar_url
   }
 
   const { data: existing } = await db
