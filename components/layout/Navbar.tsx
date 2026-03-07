@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SignInButton, UserButton, useAuth } from '@clerk/nextjs'
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { useState } from 'react'
 import { Menu, X, Search } from 'lucide-react'
 import SearchBar from './SearchBar'
@@ -16,7 +16,6 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname()
-  const { isSignedIn } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
 
@@ -51,15 +50,16 @@ export default function Navbar() {
             >
               <Search size={18} />
             </button>
-            {!isSignedIn ? (
+            <SignedOut>
               <SignInButton mode="modal">
                 <button className="bg-primary text-background px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-light transition-colors">
                   Connexion
                 </button>
               </SignInButton>
-            ) : (
+            </SignedOut>
+            <SignedIn>
               <UserButton />
-            )}
+            </SignedIn>
             <button
               className="md:hidden p-2 text-muted"
               onClick={() => setMobileOpen(!mobileOpen)}
