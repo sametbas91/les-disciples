@@ -214,10 +214,14 @@ export async function saveProfile(formData: FormData) {
   if (avatarFile && avatarFile.size > 0) {
     const ext = avatarFile.name.split('.').pop() || 'jpg'
     const filePath = `${user.id}/avatar.${ext}`
+    const buffer = Buffer.from(await avatarFile.arrayBuffer())
 
     const { error: uploadError } = await db.storage
       .from('avatars')
-      .upload(filePath, avatarFile, { upsert: true })
+      .upload(filePath, buffer, {
+        upsert: true,
+        contentType: avatarFile.type,
+      })
 
     if (!uploadError) {
       const { data: publicUrl } = db.storage.from('avatars').getPublicUrl(filePath)
