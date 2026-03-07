@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { Upload, Trash2, Music, CheckCircle } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
 
 const ACCEPTED = '.mp3,.m4a,.wav,.ogg'
 
@@ -19,12 +18,6 @@ export default function AudioUpload({
   const [done, setDone] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const getClient = () =>
-    createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
   const handleUpload = async (file: File) => {
     if (file.size > 200 * 1024 * 1024) {
       setError('Fichier trop volumineux (max 200 MB)')
@@ -37,52 +30,49 @@ export default function AudioUpload({
     setDone(false)
 
     try {
+      // Auth check
+      const authRes = await fetch('/api/audio/upload', { method: 'POST' })
+      if (!authRes.ok) throw new Error('Non autorise')
+
       const ext = file.name.split('.').pop() || 'mp3'
       const filePath = `sessions/${sessionId}/audio.${ext}`
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-      // Simulate progress while uploading
-      const progressInterval = setInterval(() => {
-        setProgress((p) => Math.min(p + 5, 90))
-      }, 200)
+      // Direct XHR upload to Supabase Storage REST API with progress tracking
+      // Using the /object endpoint with upsert header
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/audios/${filePath}`
 
-      const res = await fetch(`/api/audio/upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          fileName: filePath,
-          contentType: file.type,
-        }),
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', uploadUrl, true)
+        xhr.setRequestHeader('Authorization', `Bearer ${anonKey}`)
+        xhr.setRequestHeader('apikey', anonKey)
+        xhr.setRequestHeader('x-upsert', 'true')
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setProgress(Math.round((e.loaded / e.total) * 95))
+          }
+        }
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve()
+          else reject(new Error(`Upload echoue (${xhr.status}): ${xhr.responseText}`))
+        }
+
+        xhr.onerror = () => reject(new Error('Erreur reseau'))
+
+        xhr.send(file)
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Erreur upload')
-      }
+      // Get public URL and save
+      const publicUrl = `${supabaseUrl}/storage/v1/object/public/audios/${filePath}`
 
-      // Upload directly to storage
-      const supabase = getClient()
-      const { error: uploadError } = await supabase.storage
-        .from('audios')
-        .upload(filePath, file, {
-          upsert: true,
-          contentType: file.type,
-        })
-
-      clearInterval(progressInterval)
-
-      if (uploadError) throw new Error(uploadError.message)
-
-      // Get public URL and save to session
-      const { data: publicUrl } = supabase.storage.from('audios').getPublicUrl(filePath)
-
-      const saveRes = await fetch(`/api/audio/save`, {
+      const saveRes = await fetch('/api/audio/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          audioUrl: publicUrl.publicUrl,
-        }),
+        body: JSON.stringify({ sessionId, audioUrl: publicUrl }),
       })
 
       if (!saveRes.ok) throw new Error('Erreur sauvegarde URL')
@@ -102,7 +92,7 @@ export default function AudioUpload({
     setError('')
 
     try {
-      const res = await fetch(`/api/audio/delete`, {
+      const res = await fetch('/api/audio/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
