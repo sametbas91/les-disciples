@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { Upload, Trash2, Music, CheckCircle } from 'lucide-react'
+import * as tus from 'tus-js-client'
+import { saveAudioUrl, deleteAudio } from '@/lib/actions'
 
 const ACCEPTED = '.mp3,.m4a,.wav,.ogg'
 
@@ -29,62 +31,57 @@ export default function AudioUpload({
     setError('')
     setDone(false)
 
-    try {
-      // Auth check
-      const authRes = await fetch('/api/audio/upload', { method: 'POST' })
-      if (!authRes.ok) throw new Error('Non autorise')
+    const ext = file.name.split('.').pop() || 'mp3'
+    const filePath = `sessions/${sessionId}/audio.${ext}`
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-      const ext = file.name.split('.').pop() || 'mp3'
-      const filePath = `sessions/${sessionId}/audio.${ext}`
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-      // Direct XHR upload to Supabase Storage REST API with progress tracking
-      // Using the /object endpoint with upsert header
-      const uploadUrl = `${supabaseUrl}/storage/v1/object/audios/${filePath}`
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open('POST', uploadUrl, true)
-        xhr.setRequestHeader('Authorization', `Bearer ${anonKey}`)
-        xhr.setRequestHeader('apikey', anonKey)
-        xhr.setRequestHeader('x-upsert', 'true')
-
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            setProgress(Math.round((e.loaded / e.total) * 95))
-          }
+    const upload = new tus.Upload(file, {
+      endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
+      retryDelays: [0, 1000, 3000, 5000],
+      headers: {
+        authorization: `Bearer ${anonKey}`,
+        apikey: anonKey,
+        'x-upsert': 'true',
+      },
+      uploadDataDuringCreation: true,
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        bucketName: 'audios',
+        objectName: filePath,
+        contentType: file.type,
+        cacheControl: '3600',
+      },
+      chunkSize: 6 * 1024 * 1024, // 6MB chunks
+      onError: (err) => {
+        setError(err.message || 'Erreur upload')
+        setUploading(false)
+      },
+      onProgress: (bytesUploaded, bytesTotal) => {
+        setProgress(Math.round((bytesUploaded / bytesTotal) * 95))
+      },
+      onSuccess: async () => {
+        try {
+          const publicUrl = `${supabaseUrl}/storage/v1/object/public/audios/${filePath}`
+          await saveAudioUrl(sessionId, publicUrl)
+          setProgress(100)
+          setDone(true)
+          setTimeout(() => window.location.reload(), 1000)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Erreur sauvegarde URL')
+        } finally {
+          setUploading(false)
         }
+      },
+    })
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve()
-          else reject(new Error(`Upload echoue (${xhr.status}): ${xhr.responseText}`))
-        }
-
-        xhr.onerror = () => reject(new Error('Erreur reseau'))
-
-        xhr.send(file)
-      })
-
-      // Get public URL and save
-      const publicUrl = `${supabaseUrl}/storage/v1/object/public/audios/${filePath}`
-
-      const saveRes = await fetch('/api/audio/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, audioUrl: publicUrl }),
-      })
-
-      if (!saveRes.ok) throw new Error('Erreur sauvegarde URL')
-
-      setProgress(100)
-      setDone(true)
-      setTimeout(() => window.location.reload(), 1000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue')
-    } finally {
-      setUploading(false)
-    }
+    // Check for previous uploads to resume
+    upload.findPreviousUploads().then((previousUploads) => {
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0])
+      }
+      upload.start()
+    })
   }
 
   const handleDelete = async () => {
@@ -92,12 +89,7 @@ export default function AudioUpload({
     setError('')
 
     try {
-      const res = await fetch('/api/audio/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
-      })
-      if (!res.ok) throw new Error('Erreur suppression')
+      await deleteAudio(sessionId)
       window.location.reload()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
