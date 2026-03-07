@@ -21,7 +21,7 @@ export default function MembersList({
   totalSessions: number
 }) {
   const [showForm, setShowForm] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'Disciple' | 'Invit\u00e9(e)'>('all')
+  const [filter, setFilter] = useState<'all' | 'Disciple' | 'Invité(e)'>('all')
 
   const filtered = filter === 'all' ? members : members.filter((m) => m.status === filter)
   const disciples = filtered.filter((m) => m.status === 'Disciple')
@@ -36,7 +36,7 @@ export default function MembersList({
 
   const handleStatusToggle = async (m: MemberWithStats) => {
     const fd = new FormData()
-    fd.set('status', m.status === 'Disciple' ? 'Invit\u00e9(e)' : 'Disciple')
+    fd.set('status', m.status === 'Disciple' ? 'Invité(e)' : 'Disciple')
     await updateMember(m.id, fd)
   }
 
@@ -94,7 +94,7 @@ export default function MembersList({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex gap-2">
-          {(['all', 'Disciple', 'Invit\u00e9(e)'] as const).map((f) => (
+          {(['all', 'Disciple', 'Invité(e)'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -145,7 +145,7 @@ export default function MembersList({
         </div>
       ) : null}
 
-      {filter === 'all' || filter === 'Invit\u00e9(e)' ? (
+      {filter === 'all' || filter === 'Invité(e)' ? (
         <div className="mt-4">
           <h3 className="text-sm font-medium text-invite mb-2">Invites ({invites.length})</h3>
           <div className="space-y-2">{invites.map(renderMember)}</div>

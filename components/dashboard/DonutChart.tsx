@@ -5,7 +5,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recha
 export default function DonutChart({ disciples, invites }: { disciples: number; invites: number }) {
   const data = [
     { name: 'Disciples', value: disciples },
-    { name: 'Invit\u00e9s', value: invites },
+    { name: 'Invités', value: invites },
   ]
   const COLORS = ['#c9922a', '#5a5a5a']
 

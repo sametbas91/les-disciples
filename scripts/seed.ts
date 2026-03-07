@@ -13,13 +13,13 @@ const DISCIPLES = [
 const INVITES = [
   'Abel Clouch', 'Alicia M', 'Alicia D', 'Bedou', 'Djody', 'Doriane', 'Emy',
   'Esther', 'Evans', 'Freeman', 'Jaymay/Warren', 'Ketsia', 'Kim-gaye Karla',
-  'Laura', 'Luigi', 'Luriane', 'Malcolm', 'Mardoch\u00e9e', 'Merveille', 'Mitchiiz',
-  'No\u00e9mie', 'Ornelly', 'Samba Jeremy', 'Sephora', 'Shelby', 'Steve Angoran',
+  'Laura', 'Luigi', 'Luriane', 'Malcolm', 'Mardochée', 'Merveille', 'Mitchiiz',
+  'Noémie', 'Ornelly', 'Samba Jeremy', 'Sephora', 'Shelby', 'Steve Angoran',
   'Stevens', 'Victor', 'Victoriane',
 ]
 
 // Dylan, Ethan, Leonce are also Disciples to add
-const EXTRA_DISCIPLES = ['Dylan', 'Ethan', 'L\u00e9once']
+const EXTRA_DISCIPLES = ['Dylan', 'Ethan', 'Léonce']
 
 const BIRTHDAYS: Record<string, string> = {
   'Hadriano': '2000-02-04',
@@ -38,7 +38,7 @@ const BIRTHDAYS: Record<string, string> = {
   'Sobdorson': '2000-11-04',
   'Messy': '2000-12-24',
   'Ethan': '2000-04-13',
-  'L\u00e9once': '2000-09-09',
+  'Léonce': '2000-09-09',
   'Marco': '2000-05-23',
 }
 
@@ -53,7 +53,7 @@ type SessionData = {
 const SESSIONS: SessionData[] = [
   {
     date: '2026-01-25',
-    theme: "Le type de pri\u00e8re qui n'\u00e9choue jamais",
+    theme: "Le type de prière qui n'échoue jamais",
     duration: 120,
     presents: ['Alicia M', 'Bedou', 'Chris', 'Church-Hill', 'David', 'Doriane', 'Emy', 'Harold', 'Keny', 'Ketsia', 'Marco', 'Merveille', 'Messy', 'Ornelly', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Stevens', 'Victor'],
   },
@@ -67,24 +67,24 @@ const SESSIONS: SessionData[] = [
     date: '2026-02-08',
     theme: 'Les relations',
     duration: 160,
-    presents: ['Alicia D', 'Bedou', 'Chris', 'Church-Hill', 'David', 'Emy', 'Harold', 'Keny', 'Ketsia', 'Kim-gaye Karla', 'Luriane', 'Marco', 'Messy', 'Ornelly', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Stevens', 'Louis', 'Djody', 'Steve Angoran', 'Esther', 'Alicia M', 'Sephora', 'No\u00e9mie'],
+    presents: ['Alicia D', 'Bedou', 'Chris', 'Church-Hill', 'David', 'Emy', 'Harold', 'Keny', 'Ketsia', 'Kim-gaye Karla', 'Luriane', 'Marco', 'Messy', 'Ornelly', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Stevens', 'Louis', 'Djody', 'Steve Angoran', 'Esther', 'Alicia M', 'Sephora', 'Noémie'],
   },
   {
     date: '2026-02-15',
-    theme: 'T\u00e9moignages',
+    theme: 'Témoignages',
     duration: 210,
     presents: ['Bedou', 'Chris', 'Church-Hill', 'David', 'Emy', 'Hadriano', 'Harold', 'Keny', 'Kim-gaye Karla', 'Marco', 'Merveille', 'Messy', 'Ornelly', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Victoriane', 'Louis', 'Alicia M'],
   },
   {
     date: '2026-02-22',
-    theme: 'Deviens extraordinaire comme J\u00e9sus',
+    theme: 'Deviens extraordinaire comme Jésus',
     duration: 198,
-    presents: ['Alicia M', 'Bedou', 'Chris', 'Church-Hill', 'David', 'Emy', 'Esther', 'Farrel', 'Freeman', 'Hadriano', 'Harold', 'Jaymay/Warren', 'Keny', 'Ketsia', 'Kim-gaye Karla', 'Laura', 'Louis', 'Luriane', 'Marco', 'Merveille', 'Messy', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Steve Angoran', 'Stevens', 'Victor', 'Victoriane', 'Mardoch\u00e9e'],
-    firstTimers: ['Mardoch\u00e9e'],
+    presents: ['Alicia M', 'Bedou', 'Chris', 'Church-Hill', 'David', 'Emy', 'Esther', 'Farrel', 'Freeman', 'Hadriano', 'Harold', 'Jaymay/Warren', 'Keny', 'Ketsia', 'Kim-gaye Karla', 'Laura', 'Louis', 'Luriane', 'Marco', 'Merveille', 'Messy', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Steve Angoran', 'Stevens', 'Victor', 'Victoriane', 'Mardochée'],
+    firstTimers: ['Mardochée'],
   },
   {
     date: '2026-03-01',
-    theme: "Le discipolat : la cl\u00e9 divine pour transformer l'humanit\u00e9",
+    theme: "Le discipolat : la clé divine pour transformer l'humanité",
     duration: 180,
     presents: ['Abel Clouch', 'Alicia M', 'Chris', 'Church-Hill', 'David', 'Hadriano', 'Harold', 'Jaymay/Warren', 'Keny', 'Kim-gaye Karla', 'Louis', 'Luriane', 'Malcolm', 'Marco', 'Messy', 'Ornelly', 'Randy', 'Ridi', 'Samuel', 'Sobdorson', 'Stevens', 'Victor', 'Victoriane', 'Larios', 'Luigi', 'Samba Jeremy', 'Evans'],
     firstTimers: ['Evans', 'Samba Jeremy', 'Luigi', 'Larios'],
@@ -98,7 +98,7 @@ async function seed() {
   const allMembers = [
     ...DISCIPLES.map((name) => ({ name, status: 'Disciple', birthday: BIRTHDAYS[name] || null })),
     ...EXTRA_DISCIPLES.map((name) => ({ name, status: 'Disciple', birthday: BIRTHDAYS[name] || null })),
-    ...INVITES.map((name) => ({ name, status: 'Invit\u00e9(e)', birthday: BIRTHDAYS[name] || null })),
+    ...INVITES.map((name) => ({ name, status: 'Invité(e)', birthday: BIRTHDAYS[name] || null })),
   ]
 
   const { data: members, error: mErr } = await supabase

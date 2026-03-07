@@ -5,7 +5,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, Ca
 type ChartData = {
   date: string
   Disciples: number
-  'Invit\u00e9s': number
+  'Invités': number
   Total: number
 }
 
@@ -28,7 +28,7 @@ export default function AttendanceChart({ data }: { data: ChartData[] }) {
           <Legend />
           <Line type="monotone" dataKey="Total" stroke="#f5f0e8" strokeWidth={2} dot={{ fill: '#f5f0e8' }} />
           <Line type="monotone" dataKey="Disciples" stroke="#c9922a" strokeWidth={2} dot={{ fill: '#c9922a' }} />
-          <Line type="monotone" dataKey="Invit\u00e9s" stroke="#5a5a5a" strokeWidth={2} dot={{ fill: '#5a5a5a' }} />
+          <Line type="monotone" dataKey="Invités" stroke="#5a5a5a" strokeWidth={2} dot={{ fill: '#5a5a5a' }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

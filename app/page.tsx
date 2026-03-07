@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   const totalSessions = sessions?.length || 0
   const disciples = members?.filter((m) => m.status === 'Disciple') || []
-  const invites = members?.filter((m) => m.status === 'Invit\u00e9(e)') || []
+  const invites = members?.filter((m) => m.status === 'Invité(e)') || []
   const totalDuration = sessions?.reduce((sum, s) => sum + s.duration, 0) || 0
 
   const uniqueParticipants = new Set(attendances?.map((a) => a.member_id)).size
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
     return {
       date: new Date(s.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
       Disciples: discipleCount,
-      'Invit\u00e9s': inviteCount,
+      'Invités': inviteCount,
       Total: sessionAttendances.length,
     }
   }) || []

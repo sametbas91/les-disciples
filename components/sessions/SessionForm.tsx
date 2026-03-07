@@ -23,7 +23,7 @@ export default function SessionForm({
   )
   const [showNewMember, setShowNewMember] = useState(false)
   const [newMemberName, setNewMemberName] = useState('')
-  const [newMemberStatus, setNewMemberStatus] = useState<'Disciple' | 'Invit\u00e9(e)'>('Invit\u00e9(e)')
+  const [newMemberStatus, setNewMemberStatus] = useState<'Disciple' | 'Invité(e)'>('Invité(e)')
 
   const toggleAttendee = (memberId: string) => {
     const next = new Map(attendees)
@@ -146,11 +146,11 @@ export default function SessionForm({
               <label className="block text-xs text-muted mb-1">Statut</label>
               <select
                 value={newMemberStatus}
-                onChange={(e) => setNewMemberStatus(e.target.value as 'Disciple' | 'Invit\u00e9(e)')}
+                onChange={(e) => setNewMemberStatus(e.target.value as 'Disciple' | 'Invité(e)')}
                 className="bg-card border border-border rounded-lg px-3 py-1.5 text-sm text-foreground outline-none"
               >
                 <option value="Disciple">Disciple</option>
-                <option value="Invit\u00e9(e)">Invite(e)</option>
+                <option value="Invité(e)">Invite(e)</option>
               </select>
             </div>
             <button type="button" onClick={handleAddMember} className="bg-primary text-background px-3 py-1.5 rounded-lg text-sm">

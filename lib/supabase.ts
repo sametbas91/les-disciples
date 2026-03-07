@@ -15,7 +15,7 @@ export function getServiceSupabase() {
 export type Member = {
   id: string
   name: string
-  status: 'Disciple' | 'Invit\u00e9(e)'
+  status: 'Disciple' | 'Invité(e)'
   birthday: string | null
   created_at: string
 }
