@@ -308,15 +308,6 @@ export async function deleteAudio(sessionId: string) {
   await requireAdmin()
   const db = getServiceSupabase()
 
-  const { data: session } = await db.from('sessions').select('audio_url').eq('id', sessionId).single()
-  if (session?.audio_url) {
-    const url = new URL(session.audio_url)
-    const pathMatch = url.pathname.match(/\/object\/public\/audios\/(.+)/)
-    if (pathMatch) {
-      await db.storage.from('audios').remove([pathMatch[1]])
-    }
-  }
-
   const { error } = await db.from('sessions').update({ audio_url: null }).eq('id', sessionId)
   if (error) throw new Error(error.message)
   revalidatePath(`/sessions/${sessionId}`)
