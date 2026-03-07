@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation'
 import DeleteSessionButton from '@/components/sessions/DeleteSessionButton'
 import CopyButton from '@/components/sessions/CopyButton'
 import CommentSection from '@/components/comments/CommentSection'
-import AttendanceList from '@/components/sessions/AttendanceList'
 import Link from 'next/link'
 import { ArrowLeft, Edit } from 'lucide-react'
 
@@ -49,6 +48,10 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
   const discipleAttendances = attendances?.filter((a) => a.member?.status === 'Disciple') || []
   const inviteAttendances = attendances?.filter((a) => a.member?.status !== 'Disciple') || []
   const newAttendances = attendances?.filter((a) => a.is_first_time) || []
+  const hasAttendances = (attendances?.length || 0) > 0
+  const displayDisciples = hasAttendances ? discipleAttendances.length : (session.disciples_count ?? 0)
+  const displayInvites = hasAttendances ? inviteAttendances.length : (session.invites_count ?? 0)
+  const displayTotal = hasAttendances ? (attendances?.length || 0) : (displayDisciples + displayInvites)
 
   const copyText = `Session du ${formatDate(session.date)} - "${session.theme}" (${formatDuration(session.duration)})
 
@@ -77,7 +80,7 @@ Total presents : ${attendances?.length || 0}`
             <p className="text-sm text-muted mt-1">{formatDuration(session.duration)}</p>
           </div>
           <div className="flex gap-2">
-            <CopyButton text={copyText} />
+            {isAdmin && <CopyButton text={copyText} />}
             {isAdmin && (
               <>
                 <Link
@@ -94,13 +97,25 @@ Total presents : ${attendances?.length || 0}`
         </div>
       </div>
 
-      {/* Participants */}
-      <AttendanceList
-        disciples={discipleAttendances}
-        invites={inviteAttendances}
-        sessionId={session.id}
-        isAdmin={isAdmin}
-      />
+      {/* Participation summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-disciple">{displayDisciples}</p>
+          <p className="text-sm text-muted">Disciples</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-invite">{displayInvites}</p>
+          <p className="text-sm text-muted">Invit&eacute;s</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-nouveau">{newAttendances.length}</p>
+          <p className="text-sm text-muted">Nouveaux</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-primary">{displayTotal}</p>
+          <p className="text-sm text-muted">Total pr&eacute;sents</p>
+        </div>
+      </div>
 
       {/* Comments */}
       <CommentSection

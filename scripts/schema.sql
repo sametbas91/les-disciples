@@ -13,6 +13,8 @@ CREATE TABLE sessions (
   date date NOT NULL,
   theme text NOT NULL,
   duration integer NOT NULL,
+  disciples_count integer,
+  invites_count integer,
   created_at timestamptz DEFAULT now()
 );
 

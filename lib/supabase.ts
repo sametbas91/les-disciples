@@ -25,6 +25,8 @@ export type Session = {
   date: string
   theme: string
   duration: number
+  disciples_count: number | null
+  invites_count: number | null
   created_at: string
 }
 

@@ -1,6 +1,6 @@
-# Les Disciples - Dashboard
+# Impact Disciple - Dashboard
 
-Dashboard de gestion des sessions d'enseignement hebdomadaires du groupe **RGL - Les Disciples**.
+Dashboard de gestion des sessions d'enseignement hebdomadaires du groupe **RGL - Impact Disciple**.
 
 ## Stack technique
 

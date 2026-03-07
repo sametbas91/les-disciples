@@ -19,7 +19,7 @@ export default async function AdminPage() {
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
         <h2 className="text-lg font-semibold">Informations du groupe</h2>
         <div className="space-y-2 text-sm">
-          <p><span className="text-muted">Nom :</span> RGL - Les Disciples</p>
+          <p><span className="text-muted">Nom :</span> RGL - Impact Disciple</p>
           <p><span className="text-muted">Description :</span> Groupe de jeunes hommes du R&eacute;seau G&eacute;n&eacute;ration Lumi&egrave;re d&apos;AP Samuel qui veulent vivre et d&eacute;montrer Christ &agrave; leur g&eacute;n&eacute;ration.</p>
           <p><span className="text-muted">Objectif :</span> 70 000 disciples de J&eacute;sus d&apos;ici 5 ans</p>
           <p><span className="text-muted">Mission :</span> &Eacute;vang&eacute;liser &amp; Former des disciples</p>

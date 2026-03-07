@@ -15,10 +15,12 @@ export default function MembersList({
   members,
   isAdmin,
   totalSessions,
+  isLoggedIn,
 }: {
   members: MemberWithStats[]
   isAdmin: boolean
   totalSessions: number
+  isLoggedIn: boolean
 }) {
   const [showForm, setShowForm] = useState(false)
   const [filter, setFilter] = useState<'all' | 'Berger' | 'Disciple' | 'Invité(e)'>('all')
@@ -72,19 +74,21 @@ export default function MembersList({
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 mt-2 text-sm text-muted">
-            <span className="shrink-0">{m.sessionsAttended}/{totalSessions}</span>
-            <div className="flex-1 max-w-[100px] bg-border rounded-full h-2">
-              <div
-                className="h-2 rounded-full transition-all"
-                style={{
-                  width: `${m.attendanceRate}%`,
-                  backgroundColor: m.attendanceRate > 66 ? '#2ecc71' : m.attendanceRate > 33 ? '#e8b84b' : '#e74c3c',
-                }}
-              />
+          {isLoggedIn && (
+            <div className="flex items-center gap-3 mt-2 text-sm text-muted">
+              <span className="shrink-0">{m.sessionsAttended}/{totalSessions}</span>
+              <div className="flex-1 max-w-[100px] bg-border rounded-full h-2">
+                <div
+                  className="h-2 rounded-full transition-all"
+                  style={{
+                    width: `${m.attendanceRate}%`,
+                    backgroundColor: m.attendanceRate > 66 ? '#2ecc71' : m.attendanceRate > 33 ? '#e8b84b' : '#e74c3c',
+                  }}
+                />
+              </div>
+              <span className="text-xs shrink-0">{m.attendanceRate}%</span>
             </div>
-            <span className="text-xs shrink-0">{m.attendanceRate}%</span>
-          </div>
+          )}
         </div>
         {isAdmin && (
           <div className="flex gap-1.5 shrink-0">

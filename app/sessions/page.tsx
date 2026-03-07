@@ -39,7 +39,8 @@ export default async function SessionsPage() {
 
       <div className="grid gap-4">
         {sessions?.map((session) => {
-          const stats = attendanceMap.get(session.id) || { total: 0, newCount: 0 }
+          const raw = attendanceMap.get(session.id)
+          const stats = raw || { total: (session.disciples_count ?? 0) + (session.invites_count ?? 0), newCount: 0 }
           return (
             <Link
               key={session.id}

@@ -50,13 +50,14 @@ export default async function DashboardPage() {
   // Chart data
   const chartData = sessions?.map((s) => {
     const sessionAttendances = attendances?.filter((a) => a.session_id === s.id) || []
-    const discipleCount = sessionAttendances.filter((a) => a.member?.status === 'Disciple').length
-    const inviteCount = sessionAttendances.filter((a) => a.member?.status !== 'Disciple').length
+    const hasAtt = sessionAttendances.length > 0
+    const discipleCount = hasAtt ? sessionAttendances.filter((a) => a.member?.status === 'Disciple').length : (s.disciples_count ?? 0)
+    const inviteCount = hasAtt ? sessionAttendances.filter((a) => a.member?.status !== 'Disciple').length : (s.invites_count ?? 0)
     return {
       date: new Date(s.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
       Disciples: discipleCount,
       'Invités': inviteCount,
-      Total: sessionAttendances.length,
+      Total: hasAtt ? sessionAttendances.length : (discipleCount + inviteCount),
     }
   }) || []
 
@@ -102,7 +103,7 @@ export default async function DashboardPage() {
       {/* Banner */}
       <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
         <h1 className="text-2xl sm:text-4xl font-bold text-primary mb-2">
-          Les Disciples
+          Impact Disciple
         </h1>
         <p className="text-muted text-sm sm:text-base mb-4">
           Groupe de jeunes hommes du RGL d&apos;AP Samuel qui veulent vivre et d&eacute;montrer Christ &agrave; leur g&eacute;n&eacute;ration.

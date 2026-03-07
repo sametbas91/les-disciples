@@ -115,12 +115,34 @@ export default function SessionForm({
             className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-foreground outline-none focus:border-primary"
           />
         </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-muted mb-1">Nb Disciples (optionnel)</label>
+            <input
+              type="number"
+              name="disciples_count"
+              defaultValue={session?.disciples_count ?? ''}
+              min={0}
+              className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-foreground outline-none focus:border-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-muted mb-1">Nb Invit&eacute;s (optionnel)</label>
+            <input
+              type="number"
+              name="invites_count"
+              defaultValue={session?.invites_count ?? ''}
+              min={0}
+              className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-foreground outline-none focus:border-primary"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Participants */}
+      {/* Participants (optionnel) */}
       <div className="bg-card border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Participants ({attendees.size})</h3>
+          <h3 className="font-semibold">Participants - optionnel ({attendees.size})</h3>
           <button
             type="button"
             onClick={() => setShowNewMember(!showNewMember)}

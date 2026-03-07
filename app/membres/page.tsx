@@ -5,8 +5,9 @@ import MembersList from '@/components/members/MembersList'
 export const dynamic = 'force-dynamic'
 
 export default async function MembresPage() {
-  const { sessionClaims } = await auth()
+  const { sessionClaims, userId } = await auth()
   const isAdmin = sessionClaims?.metadata?.role === 'admin'
+  const isLoggedIn = !!userId
   const db = getServiceSupabase()
 
   const { data: members } = await db.from('members').select('*').order('name')
@@ -29,7 +30,7 @@ export default async function MembresPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl sm:text-3xl font-bold">Membres</h1>
-      <MembersList members={membersWithStats} isAdmin={isAdmin} totalSessions={totalSessions} />
+      <MembersList members={membersWithStats} isAdmin={isAdmin} totalSessions={totalSessions} isLoggedIn={isLoggedIn} />
     </div>
   )
 }

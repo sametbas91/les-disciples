@@ -5,8 +5,8 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
-  title: "Les Disciples - Dashboard",
-  description: "Dashboard de gestion des sessions d'enseignement - RGL Les Disciples",
+  title: "Impact Disciple - Dashboard",
+  description: "Dashboard de gestion des sessions d'enseignement - RGL Impact Disciple",
 };
 
 export default function RootLayout({
