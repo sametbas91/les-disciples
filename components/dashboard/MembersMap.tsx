@@ -50,7 +50,7 @@ export default function MembersMap({ profiles }: { profiles: MapProfile[] }) {
 
   return (
     <div className="h-[400px] rounded-xl overflow-hidden border border-border">
-      <MapContainer center={center} zoom={8} minZoom={6} maxZoom={18} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+      <MapContainer center={center} zoom={6} minZoom={4} maxZoom={18} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
