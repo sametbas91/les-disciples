@@ -46,14 +46,11 @@ export default function MembersMap({ profiles }: { profiles: MapProfile[] }) {
     )
   }
 
-  const center: [number, number] = [
-    validProfiles.reduce((s, p) => s + p.latitude, 0) / validProfiles.length,
-    validProfiles.reduce((s, p) => s + p.longitude, 0) / validProfiles.length,
-  ]
+  const center: [number, number] = [48.8566, 2.3522]
 
   return (
     <div className="h-[400px] rounded-xl overflow-hidden border border-border">
-      <MapContainer center={center} zoom={4} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+      <MapContainer center={center} zoom={10} minZoom={8} maxZoom={18} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
