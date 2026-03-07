@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation'
 import DeleteSessionButton from '@/components/sessions/DeleteSessionButton'
 import CopyButton from '@/components/sessions/CopyButton'
 import CommentSection from '@/components/comments/CommentSection'
+import AudioPlayer from '@/components/sessions/AudioPlayer'
+import AudioUpload from '@/components/sessions/AudioUpload'
 import Link from 'next/link'
 import { ArrowLeft, Edit } from 'lucide-react'
 
@@ -14,6 +16,7 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
   const { id } = await params
   const { sessionClaims, userId } = await auth()
   const isAdmin = sessionClaims?.metadata?.role === 'admin'
+  const isLoggedIn = !!userId
   const db = getServiceSupabase()
 
   const { data: session } = await db.from('sessions').select('*').eq('id', id).single()
@@ -116,6 +119,14 @@ Total presents : ${attendances?.length || 0}`
           <p className="text-sm text-muted">Total pr&eacute;sents</p>
         </div>
       </div>
+
+      {/* Audio */}
+      {session.audio_url && (
+        <AudioPlayer url={session.audio_url} isLoggedIn={isLoggedIn} />
+      )}
+      {isAdmin && (
+        <AudioUpload sessionId={session.id} currentUrl={session.audio_url} />
+      )}
 
       {/* Comments */}
       <CommentSection

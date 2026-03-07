@@ -27,6 +27,7 @@ export type Session = {
   duration: number
   disciples_count: number | null
   invites_count: number | null
+  audio_url: string | null
   created_at: string
 }
 

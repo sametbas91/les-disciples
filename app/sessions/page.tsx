@@ -2,7 +2,7 @@ import { getServiceSupabase } from '@/lib/supabase'
 import { formatDate, formatDuration } from '@/lib/utils'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
-import { Plus, Users, Sparkles } from 'lucide-react'
+import { Plus, Users, Sparkles, Headphones } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,8 +49,14 @@ export default async function SessionsPage() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                     {session.theme}
+                    {session.audio_url && (
+                      <span className="inline-flex items-center gap-1 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full shrink-0">
+                        <Headphones size={10} />
+                        Audio
+                      </span>
+                    )}
                   </h3>
                   <p className="text-sm text-muted mt-1">{formatDate(session.date)}</p>
                 </div>

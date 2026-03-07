@@ -15,6 +15,7 @@ CREATE TABLE sessions (
   duration integer NOT NULL,
   disciples_count integer,
   invites_count integer,
+  audio_url text,
   created_at timestamptz DEFAULT now()
 );
 
