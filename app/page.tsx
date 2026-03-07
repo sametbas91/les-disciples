@@ -86,23 +86,14 @@ export default async function DashboardPage() {
     return sDate.getMonth() === now.getMonth() && sDate.getFullYear() === now.getFullYear()
   }) || []
 
-  // Age distribution from profiles
-  const ageTranches = [
-    { tranche: '-18', min: 0, max: 17 },
-    { tranche: '18-25', min: 18, max: 25 },
-    { tranche: '26-30', min: 26, max: 30 },
-    { tranche: '31-40', min: 31, max: 40 },
-    { tranche: '40+', min: 41, max: 200 },
-  ]
+  // Age data from profiles - individual members
   const now2 = new Date()
-  const ageData = ageTranches.map(({ tranche, min, max }) => ({
-    tranche,
-    count: (profiles || []).filter((p) => {
-      if (!p.birth_date) return false
-      const age = Math.floor((now2.getTime() - new Date(p.birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
-      return age >= min && age <= max
-    }).length,
-  }))
+  const ageData = (profiles || [])
+    .filter((p) => p.birth_date && p.first_name)
+    .map((p) => ({
+      name: p.first_name!,
+      age: Math.floor((now2.getTime() - new Date(p.birth_date!).getTime()) / (365.25 * 24 * 60 * 60 * 1000)),
+    }))
 
   const nextSunday = getNextSunday()
 
@@ -134,7 +125,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         <KPICard icon={<BookOpen size={20} />} label="Sessions" value={totalSessions} />
         <KPICard icon={<Users size={20} />} label="Participants uniques" value={uniqueParticipants} />
         <KPICard icon={<Target size={20} />} label="Disciples" value={disciples.length} color="text-disciple" />
@@ -144,25 +135,25 @@ export default async function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-card border border-border rounded-2xl p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="md:col-span-2 bg-card border border-border rounded-2xl p-4 sm:p-6">
           <h2 className="text-lg font-semibold mb-4">Participation par session</h2>
           <AttendanceChart data={chartData} />
         </div>
-        <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
           <h2 className="text-lg font-semibold mb-4">R&eacute;partition</h2>
           <DonutChart disciples={disciples.length} invites={invites.length} />
         </div>
       </div>
 
       {/* Age Distribution */}
-      <div className="bg-card border border-border rounded-2xl p-6">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
         <h2 className="text-lg font-semibold mb-4">Repartition des ages</h2>
         <AgeChart data={ageData} />
       </div>
 
       {/* Bottom row */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Birthdays */}
         <BirthdayWidget members={membersWithBirthday} />
 
@@ -198,7 +189,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Members Map - bottom */}
-      <div className="bg-card border border-border rounded-2xl p-6">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <MapPin size={20} className="text-primary" />
           Ou sont nos membres ?

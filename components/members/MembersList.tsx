@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createMember, updateMember, deleteMember } from '@/lib/actions'
-import { Plus, Trash2, Sparkles } from 'lucide-react'
+import { Plus, Trash2, Sparkles, Edit, X } from 'lucide-react'
 import type { Member } from '@/lib/supabase'
 
 type MemberWithStats = Member & {
@@ -22,6 +22,8 @@ export default function MembersList({
 }) {
   const [showForm, setShowForm] = useState(false)
   const [filter, setFilter] = useState<'all' | 'Berger' | 'Disciple' | 'Invité(e)'>('all')
+  const [editingMember, setEditingMember] = useState<MemberWithStats | null>(null)
+  const [editSaving, setEditSaving] = useState(false)
 
   const filtered = filter === 'all' ? members : members.filter((m) => m.status === filter)
   const bergers = filtered.filter((m) => m.status === 'Berger')
@@ -35,13 +37,15 @@ export default function MembersList({
     setShowForm(false)
   }
 
-  const [statusMenuId, setStatusMenuId] = useState<string | null>(null)
-
-  const handleStatusChange = async (id: string, newStatus: string) => {
-    const fd = new FormData()
-    fd.set('status', newStatus)
-    await updateMember(id, fd)
-    setStatusMenuId(null)
+  const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!editingMember) return
+    if (!confirm('Sauvegarder les modifications ?')) return
+    setEditSaving(true)
+    const fd = new FormData(e.currentTarget)
+    await updateMember(editingMember.id, fd)
+    setEditingMember(null)
+    setEditSaving(false)
   }
 
   const handleDelete = async (id: string) => {
@@ -51,69 +55,121 @@ export default function MembersList({
   }
 
   const renderMember = (m: MemberWithStats) => (
-    <div key={m.id} className="bg-card-hover rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{m.name}</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${
-            m.status === 'Berger' ? 'bg-primary/20 text-primary' :
-            m.status === 'Disciple' ? 'bg-disciple/20 text-disciple' : 'bg-invite/20 text-invite'
-          }`}>
-            {m.status}
-          </span>
-          {m.isNew && (
-            <span className="flex items-center gap-1 text-xs text-nouveau">
-              <Sparkles size={10} /> Nouveau
+    <div key={m.id} className="bg-card-hover rounded-xl p-3 sm:p-4">
+      <div className="flex items-start sm:items-center justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium truncate">{m.name}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
+              m.status === 'Berger' ? 'bg-primary/20 text-primary' :
+              m.status === 'Disciple' ? 'bg-disciple/20 text-disciple' : 'bg-invite/20 text-invite'
+            }`}>
+              {m.status}
             </span>
-          )}
-        </div>
-        <div className="flex items-center gap-4 mt-2 text-sm text-muted">
-          <span>{m.sessionsAttended}/{totalSessions} sessions</span>
-          <div className="flex-1 max-w-[120px] bg-border rounded-full h-2">
-            <div
-              className="h-2 rounded-full transition-all"
-              style={{
-                width: `${m.attendanceRate}%`,
-                backgroundColor: m.attendanceRate > 66 ? '#2ecc71' : m.attendanceRate > 33 ? '#e8b84b' : '#e74c3c',
-              }}
-            />
+            {m.isNew && (
+              <span className="flex items-center gap-1 text-xs text-nouveau shrink-0">
+                <Sparkles size={10} /> Nouveau
+              </span>
+            )}
           </div>
-          <span className="text-xs">{m.attendanceRate}%</span>
-        </div>
-      </div>
-      {isAdmin && (
-        <div className="flex gap-2 relative">
-          <button
-            onClick={() => setStatusMenuId(statusMenuId === m.id ? null : m.id)}
-            className="text-xs bg-card border border-border px-2 py-1 rounded-lg hover:border-primary transition-colors"
-          >
-            Changer statut
-          </button>
-          {statusMenuId === m.id && (
-            <div className="absolute right-12 top-0 z-10 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-              {['Berger', 'Disciple', 'Invité(e)'].filter((s) => s !== m.status).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleStatusChange(m.id, s)}
-                  className="block w-full text-left px-3 py-1.5 text-xs hover:bg-card-hover transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
+          <div className="flex items-center gap-3 mt-2 text-sm text-muted">
+            <span className="shrink-0">{m.sessionsAttended}/{totalSessions}</span>
+            <div className="flex-1 max-w-[100px] bg-border rounded-full h-2">
+              <div
+                className="h-2 rounded-full transition-all"
+                style={{
+                  width: `${m.attendanceRate}%`,
+                  backgroundColor: m.attendanceRate > 66 ? '#2ecc71' : m.attendanceRate > 33 ? '#e8b84b' : '#e74c3c',
+                }}
+              />
             </div>
-          )}
-          <button onClick={() => handleDelete(m.id)} className="text-muted hover:text-red-400">
-            <Trash2 size={14} />
-          </button>
+            <span className="text-xs shrink-0">{m.attendanceRate}%</span>
+          </div>
         </div>
-      )}
+        {isAdmin && (
+          <div className="flex gap-1.5 shrink-0">
+            <button
+              onClick={() => setEditingMember(m)}
+              className="p-1.5 text-muted hover:text-primary transition-colors"
+              title="Modifier"
+            >
+              <Edit size={14} />
+            </button>
+            <button onClick={() => handleDelete(m.id)} className="p-1.5 text-muted hover:text-red-400 transition-colors" title="Supprimer">
+              <Trash2 size={14} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex gap-2">
+      {/* Edit Modal */}
+      {editingMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setEditingMember(null)}>
+          <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Modifier le membre</h3>
+              <button onClick={() => setEditingMember(null)} className="text-muted hover:text-foreground">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs text-muted mb-1">Nom</label>
+                <input
+                  name="name"
+                  defaultValue={editingMember.name}
+                  required
+                  className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-muted mb-1">Statut</label>
+                <select
+                  name="status"
+                  defaultValue={editingMember.status}
+                  className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                >
+                  <option value="Berger">Berger</option>
+                  <option value="Disciple">Disciple</option>
+                  <option value="Invité(e)">Invite(e)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-muted mb-1">Date d&apos;anniversaire</label>
+                <input
+                  type="date"
+                  name="birthday"
+                  defaultValue={editingMember.birthday || ''}
+                  className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingMember(null)}
+                  className="flex-1 bg-card-hover border border-border px-4 py-2 rounded-lg text-sm hover:bg-border transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  className="flex-1 bg-primary text-background px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-light transition-colors disabled:opacity-50"
+                >
+                  {editSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap gap-2">
           {(['all', 'Berger', 'Disciple', 'Invité(e)'] as const).map((f) => (
             <button
               key={f}
@@ -132,30 +188,32 @@ export default function MembersList({
             className="flex items-center gap-1 text-primary text-sm hover:text-primary-light ml-auto"
           >
             <Plus size={14} />
-            Ajouter un membre
+            Ajouter
           </button>
         )}
       </div>
 
       {showForm && isAdmin && (
-        <form onSubmit={handleCreate} className="bg-card border border-border rounded-2xl p-4 flex flex-wrap gap-3 items-end">
-          <div className="flex-1 min-w-[150px]">
+        <form onSubmit={handleCreate} className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <div>
             <label className="block text-xs text-muted mb-1">Nom</label>
             <input name="name" required className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none" />
           </div>
-          <div>
-            <label className="block text-xs text-muted mb-1">Statut</label>
-            <select name="status" className="bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none">
-              <option value="Berger">Berger</option>
-              <option value="Disciple">Disciple</option>
-              <option value="Invité(e)">Invite(e)</option>
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-muted mb-1">Statut</label>
+              <select name="status" className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none">
+                <option value="Berger">Berger</option>
+                <option value="Disciple">Disciple</option>
+                <option value="Invité(e)">Invite(e)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-muted mb-1">Anniversaire</label>
+              <input type="date" name="birthday" className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none" />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs text-muted mb-1">Anniversaire</label>
-            <input type="date" name="birthday" className="bg-card-hover border border-border rounded-lg px-3 py-2 text-sm text-foreground outline-none" />
-          </div>
-          <button type="submit" className="bg-primary text-background px-4 py-2 rounded-lg text-sm">Ajouter</button>
+          <button type="submit" className="w-full bg-primary text-background px-4 py-2 rounded-lg text-sm font-medium">Ajouter</button>
         </form>
       )}
 

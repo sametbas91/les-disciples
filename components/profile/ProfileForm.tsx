@@ -155,7 +155,6 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
             Changer la photo
           </button>
           {converting && <p className="text-xs text-primary mt-1">Conversion en cours...</p>}
-          {!converting && <p className="text-xs text-muted mt-1">JPG, PNG, HEIC. Max 2 Mo.</p>}
         </div>
         <input
           ref={fileInputRef}
