@@ -26,17 +26,37 @@ type ClerkUser = {
 
 export default function ProfileForm({ profile, clerkUser }: { profile: Profile; clerkUser: ClerkUser }) {
   const [saving, setSaving] = useState(false)
+  const [converting, setConverting] = useState(false)
   const [message, setMessage] = useState('')
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null)
+  const [convertedFile, setConvertedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => setAvatarPreview(reader.result as string)
-      reader.readAsDataURL(file)
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    let file = e.target.files?.[0]
+    if (!file) return
+
+    const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+      || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
+
+    if (isHeic) {
+      setConverting(true)
+      try {
+        const heic2any = (await import('heic2any')).default
+        const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 }) as Blob
+        file = new File([blob], file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg'), { type: 'image/jpeg' })
+      } catch {
+        setMessage('Erreur lors de la conversion HEIC.')
+        setConverting(false)
+        return
+      }
+      setConverting(false)
     }
+
+    setConvertedFile(file)
+    const reader = new FileReader()
+    reader.onloadend = () => setAvatarPreview(reader.result as string)
+    reader.readAsDataURL(file)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -45,6 +65,10 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
     setMessage('')
     try {
       const formData = new FormData(e.currentTarget)
+      // Replace avatar with converted file if applicable
+      if (convertedFile) {
+        formData.set('avatar', convertedFile)
+      }
       await saveProfile(formData)
       setMessage('Profil sauvegarde avec succes !')
     } catch {
@@ -62,16 +86,22 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
           className="relative w-20 h-20 rounded-full border-2 border-primary overflow-hidden bg-card-hover cursor-pointer group"
           onClick={() => fileInputRef.current?.click()}
         >
-          {avatarPreview ? (
+          {converting ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 size={24} className="animate-spin text-primary" />
+            </div>
+          ) : avatarPreview ? (
             <Image src={avatarPreview} alt="Photo de profil" fill className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted">
               <Camera size={24} />
             </div>
           )}
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <Camera size={20} className="text-white" />
-          </div>
+          {!converting && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Camera size={20} className="text-white" />
+            </div>
+          )}
         </div>
         <div>
           <button
@@ -81,13 +111,14 @@ export default function ProfileForm({ profile, clerkUser }: { profile: Profile; 
           >
             Changer la photo
           </button>
-          <p className="text-xs text-muted mt-1">JPG, PNG. Max 2 Mo.</p>
+          {converting && <p className="text-xs text-primary mt-1">Conversion en cours...</p>}
+          {!converting && <p className="text-xs text-muted mt-1">JPG, PNG, HEIC. Max 2 Mo.</p>}
         </div>
         <input
           ref={fileInputRef}
           type="file"
           name="avatar"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
           onChange={handleFileChange}
           className="hidden"
         />
