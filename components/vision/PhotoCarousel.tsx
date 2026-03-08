@@ -5,11 +5,11 @@ import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const photos = [
-  { src: '/images/vision/photo1.jpg', label: 'Le noyau — les 6 premiers' },
-  { src: '/images/vision/photo2.jpg', label: 'Le réseau — plus de 20 frères' },
-  { src: '/images/vision/photo3.jpg', label: 'La communauté — ensemble après la séance' },
-  { src: '/images/vision/photo4.jpg', label: 'La famille — en dehors des sessions' },
-  { src: '/images/vision/photo5.jpg', label: "L'équipe — unis pour la mission" },
+  { src: '/images/vision/photo1.jpeg', label: 'Le noyau — les 6 premiers' },
+  { src: '/images/vision/photo2.jpeg', label: 'Le réseau — plus de 20 frères' },
+  { src: '/images/vision/photo3.jpeg', label: 'La communauté — ensemble après la séance' },
+  { src: '/images/vision/photo4.jpeg', label: 'La famille — en dehors des sessions' },
+  { src: '/images/vision/photo5.jpeg', label: "L'équipe — unis pour la mission" },
 ]
 
 export default function PhotoCarousel() {
