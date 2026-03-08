@@ -9,6 +9,7 @@ import SearchBar from './SearchBar'
 
 const links = [
   { href: '/', label: 'Dashboard' },
+  { href: '/vision', label: 'La Vision' },
   { href: '/sessions', label: 'Sessions' },
   { href: '/membres', label: 'Membres' },
   { href: '/profil', label: 'Profil' },
