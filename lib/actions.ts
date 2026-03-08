@@ -3,6 +3,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { getServiceSupabase } from './supabase'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 async function requireAdmin() {
   const { sessionClaims } = await auth()
@@ -372,6 +373,15 @@ export async function toggleDriveAccess(userId: string, value: boolean) {
   if (error) throw new Error(error.message)
   revalidatePath(`/admin/profils/${userId}`)
   revalidatePath(`/admin/profils`)
+}
+
+export async function deleteProfile(userId: string) {
+  await requireAdmin()
+  const db = getServiceSupabase()
+  const { error } = await db.from('profiles').delete().eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/profils')
+  redirect('/admin/profils')
 }
 
 // ATTENDANCE
