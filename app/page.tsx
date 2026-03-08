@@ -33,17 +33,20 @@ export default async function DashboardPage() {
 
   const uniqueParticipants = new Set(attendances?.map((a) => a.member_id)).size
 
-  // Taux de fidelite
-  const memberAttendanceCounts = new Map<string, number>()
-  attendances?.forEach((a) => {
-    memberAttendanceCounts.set(a.member_id, (memberAttendanceCounts.get(a.member_id) || 0) + 1)
+  // Taux de fidélité — disciples uniquement, 6 dernières séances
+  const last6Sessions = sessions?.slice(-6) || []
+  const last6Ids = new Set(last6Sessions.map((s) => s.id))
+  const discipleMemberIds = new Set(members?.filter((m) => m.status === 'Disciple').map((m) => m.id))
+  const last6Attendances = attendances?.filter((a) => last6Ids.has(a.session_id) && discipleMemberIds.has(a.member_id)) || []
+  const discipleAttCountMap = new Map<string, number>()
+  last6Attendances.forEach((a) => {
+    discipleAttCountMap.set(a.member_id, (discipleAttCountMap.get(a.member_id) || 0) + 1)
   })
-  const avgFidelity = totalSessions > 0 && memberAttendanceCounts.size > 0
+  const avgFidelity = last6Sessions.length > 0 && discipleMemberIds.size > 0
     ? Math.round(
-        (Array.from(memberAttendanceCounts.values()).reduce((s, c) => s + c, 0) /
-          memberAttendanceCounts.size /
-          totalSessions) *
-          100
+        Array.from(discipleAttCountMap.values()).reduce((s, c) => s + c, 0) /
+        discipleMemberIds.size /
+        last6Sessions.length * 100
       )
     : 0
 

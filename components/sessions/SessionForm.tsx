@@ -61,6 +61,10 @@ export default function SessionForm({
     e.preventDefault()
     setLoading(true)
     const fd = new FormData(e.currentTarget)
+    // Convertir heures + minutes en minutes total
+    const hours = parseInt(fd.get('duration_hours') as string || '0')
+    const mins = parseInt(fd.get('duration_minutes') as string || '0')
+    fd.set('duration', String(hours * 60 + mins))
     fd.set('attendees', JSON.stringify(
       Array.from(attendees.entries()).map(([member_id, is_first_time]) => ({ member_id, is_first_time }))
     ))
@@ -105,15 +109,31 @@ export default function SessionForm({
           />
         </div>
         <div>
-          <label className="block text-sm text-muted mb-1">Duree (minutes)</label>
-          <input
-            type="number"
-            name="duration"
-            defaultValue={session?.duration || 120}
-            required
-            min={1}
-            className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-foreground outline-none focus:border-primary"
-          />
+          <label className="block text-sm text-muted mb-1">Durée</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="relative">
+              <input
+                type="number"
+                name="duration_hours"
+                defaultValue={session ? Math.floor(session.duration / 60) : 2}
+                min={0}
+                max={12}
+                className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-foreground outline-none focus:border-primary pr-10"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted pointer-events-none">h</span>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                name="duration_minutes"
+                defaultValue={session ? session.duration % 60 : 0}
+                min={0}
+                max={59}
+                className="w-full bg-card-hover border border-border rounded-lg px-3 py-2 text-foreground outline-none focus:border-primary pr-10"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted pointer-events-none">min</span>
+            </div>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

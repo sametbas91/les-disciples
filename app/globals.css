@@ -46,6 +46,20 @@ html.light {
   --color-muted: var(--muted);
 }
 
+/* Fix champs de formulaire en mode clair */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #1a1208 !important;
+  border-color: #d0c8bb !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #a89880 !important;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);

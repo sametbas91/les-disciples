@@ -141,7 +141,7 @@ Total presents : ${attendances?.length || 0}`
             <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
               <FolderOpen size={16} className="text-primary" />
             </div>
-            <h3 className="font-semibold text-sm">Enregistrements des enseignements</h3>
+            <h3 className="font-semibold text-sm">Enseignement</h3>
           </div>
           {hasDriveAccess || isAdmin ? (
             <a
