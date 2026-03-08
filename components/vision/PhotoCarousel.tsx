@@ -5,11 +5,11 @@ import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const photos = [
-  { src: '/images/vision/photo1.jpeg', label: 'Le noyau — les 6 premiers' },
-  { src: '/images/vision/photo2.jpeg', label: 'Le réseau — plus de 20 frères' },
-  { src: '/images/vision/photo3.jpeg', label: 'La communauté — ensemble après la séance' },
-  { src: '/images/vision/photo4.jpeg', label: 'La famille — en dehors des sessions' },
-  { src: '/images/vision/photo5.jpeg', label: "L'équipe — unis pour la mission" },
+  '/images/vision/photo1.jpeg',
+  '/images/vision/photo2.jpeg',
+  '/images/vision/photo3.jpeg',
+  '/images/vision/photo4.jpeg',
+  '/images/vision/photo5.jpeg',
 ]
 
 export default function PhotoCarousel() {
@@ -31,8 +31,8 @@ export default function PhotoCarousel() {
   }, [current])
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: '16/9' }}>
-      {photos.map((photo, i) => (
+    <div className="relative w-full rounded-2xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+      {photos.map((src, i) => (
         <div
           key={i}
           className="absolute inset-0 transition-all duration-700 ease-in-out"
@@ -42,20 +42,13 @@ export default function PhotoCarousel() {
             zIndex: i === current ? 1 : 0,
           }}
         >
-          <Image
-            src={photo.src}
-            alt={photo.label}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 80vw"
-            priority={i === 0}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-          {/* Caption */}
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <p className="text-white/90 text-sm font-medium tracking-wider uppercase">{photo.label}</p>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         </div>
       ))}
 
