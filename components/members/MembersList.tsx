@@ -7,6 +7,7 @@ import type { Member } from '@/lib/supabase'
 
 type MemberWithStats = Member & {
   sessionsAttended: number
+  sessionsAttendedLast6: number
   attendanceRate: number
   isNew: boolean
 }
@@ -15,11 +16,13 @@ export default function MembersList({
   members,
   isAdmin,
   totalSessions,
+  last6Count,
   isLoggedIn,
 }: {
   members: MemberWithStats[]
   isAdmin: boolean
   totalSessions: number
+  last6Count: number
   isLoggedIn: boolean
 }) {
   const [showForm, setShowForm] = useState(false)
@@ -76,7 +79,7 @@ export default function MembersList({
           </div>
           {isLoggedIn && (
             <div className="flex items-center gap-3 mt-2 text-sm text-muted">
-              <span className="shrink-0">{m.sessionsAttended}/{totalSessions}</span>
+              <span className="shrink-0 text-xs">{m.sessionsAttendedLast6}/{last6Count} dernières</span>
               <div className="flex-1 max-w-[100px] bg-border rounded-full h-2">
                 <div
                   className="h-2 rounded-full transition-all"

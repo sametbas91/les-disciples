@@ -135,8 +135,8 @@ export default async function DashboardPage() {
         <KPICard icon={<Users size={20} />} label="Participants uniques" value={uniqueParticipants} />
         <KPICard icon={<Target size={20} />} label="Disciples" value={disciples.length} color="text-disciple" />
         <KPICard icon={<Users size={20} />} label="Invit&eacute;s" value={invites.length} color="text-invite" />
-        <KPICard icon={<Clock size={20} />} label="Heures totales" value={`${Math.round(totalDuration / 60)}h`} />
-        <KPICard icon={<TrendingUp size={20} />} label="Fid&eacute;lit&eacute;" value={`${avgFidelity}%`} />
+        <KPICard icon={<Clock size={20} />} label="Heures totales" value={`${Math.round(totalDuration / 60)}h`} subtitle="sur toutes les sessions" />
+        <KPICard icon={<TrendingUp size={20} />} label="Assiduit&eacute; disciples" value={`${avgFidelity}%`} subtitle="6 derni&egrave;res s&eacute;ances" />
       </div>
 
       {/* Charts */}
