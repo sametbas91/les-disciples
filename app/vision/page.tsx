@@ -1,4 +1,4 @@
-import PhotoCarousel from '@/components/vision/PhotoCarousel'
+import PhotoMosaic from '@/components/vision/PhotoMosaic'
 import AnimatedCounter from '@/components/vision/AnimatedCounter'
 import { Target, Megaphone, Shield, Flame } from 'lucide-react'
 import { getServiceSupabase } from '@/lib/supabase'
@@ -61,10 +61,11 @@ export default async function VisionPage() {
         </div>
       </section>
 
-      {/* ── CAROUSEL ── */}
+      {/* ── MOSAÏQUE PHOTOS ── */}
       <section className="bg-background px-6 py-16">
         <div className="max-w-5xl mx-auto">
-          <PhotoCarousel />
+          <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-6 text-center">Nos moments</p>
+          <PhotoMosaic />
         </div>
       </section>
 
