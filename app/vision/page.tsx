@@ -1,7 +1,6 @@
 import PhotoCarousel from '@/components/vision/PhotoCarousel'
 import AnimatedCounter from '@/components/vision/AnimatedCounter'
-import { Target, Megaphone, Shield, Users, ArrowRight, Flame } from 'lucide-react'
-import Link from 'next/link'
+import { Target, Megaphone, Shield, Flame } from 'lucide-react'
 import { getServiceSupabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -16,57 +15,40 @@ export default async function VisionPage() {
   const totalSessions = sessions?.length || 25
   const totalHours = Math.round((sessions?.reduce((s, x) => s + x.duration, 0) || 0) / 60)
   const disciples = members?.filter((m) => m.status === 'Disciple').length || 0
-  const totalMembers = members?.length || 0
 
   return (
     <div className="space-y-0 -mx-4 sm:-mx-6 lg:-mx-8">
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-black px-6">
-        {/* Background pattern */}
+      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-black px-6">
         <div className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `radial-gradient(circle at 25% 25%, #6c63ff 0%, transparent 50%),
                               radial-gradient(circle at 75% 75%, #2ecc71 0%, transparent 50%)`,
           }}
         />
-        <div className="relative z-10 text-center max-w-4xl mx-auto py-24">
+        <div className="relative z-10 text-center max-w-4xl mx-auto py-20">
           <div className="inline-flex items-center gap-2 bg-primary/20 border border-primary/30 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6 backdrop-blur-sm">
             <Flame size={14} />
-            Groupe de disciples — Paris & Île-de-France
+            Groupe de disciples — Paris &amp; Île-de-France
           </div>
           <h1 className="text-5xl sm:text-7xl font-black text-white leading-none tracking-tight mb-6">
             Impact<br />
             <span className="text-primary">Disciple</span>
           </h1>
-          <p className="text-white/70 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
+          <p className="text-white/70 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
             Des jeunes hommes qui ont décidé de vivre et de démontrer Christ à leur génération.
             Pas des spectateurs — des acteurs.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/sessions"
-              className="flex items-center gap-2 bg-primary text-background px-6 py-3 rounded-xl font-semibold hover:bg-primary-light transition-all hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
-            >
-              Voir nos sessions <ArrowRight size={16} />
-            </Link>
-            <Link
-              href="/membres"
-              className="flex items-center gap-2 bg-white/10 text-white border border-white/20 px-6 py-3 rounded-xl font-semibold hover:bg-white/20 transition-all backdrop-blur-sm"
-            >
-              <Users size={16} /> Notre équipe
-            </Link>
-          </div>
         </div>
       </section>
 
       {/* ── STATS ── */}
       <section className="bg-card border-y border-border px-6 py-12">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+        <div className="max-w-5xl mx-auto grid grid-cols-3 gap-8 text-center">
           {[
             { value: totalSessions, suffix: '', label: 'Sessions tenues', color: 'text-primary' },
             { value: totalHours, suffix: 'h', label: "D'enseignement", color: 'text-primary' },
-            { value: disciples, suffix: '', label: 'Disciples formés', color: 'text-disciple' },
             { value: 70000, suffix: '', label: 'Objectif disciples', color: 'text-yellow-400' },
           ].map((stat, i) => (
             <div key={i} className="space-y-1">
@@ -82,19 +64,13 @@ export default async function VisionPage() {
       {/* ── CAROUSEL ── */}
       <section className="bg-background px-6 py-16">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-2">En images</p>
-            <h2 className="text-3xl sm:text-4xl font-black">Ce que nous vivons</h2>
-          </div>
           <PhotoCarousel />
         </div>
       </section>
 
       {/* ── VISION ── */}
       <section className="relative overflow-hidden px-6 py-20"
-        style={{
-          background: 'linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0d0d0d 100%)',
-        }}
+        style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0d0d0d 100%)' }}
       >
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-5"
           style={{ background: 'radial-gradient(circle, #6c63ff, transparent)' }}
@@ -150,7 +126,7 @@ export default async function VisionPage() {
       </section>
 
       {/* ── QUI SOMMES-NOUS ── */}
-      <section className="bg-card border-y border-border px-6 py-16">
+      <section className="bg-card border-t border-border px-6 py-16">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-2">Qui sommes-nous</p>
@@ -159,24 +135,11 @@ export default async function VisionPage() {
               Impact Disciple est un groupe de jeunes hommes du RGL d&apos;AP Samuel basé en région parisienne. Chaque dimanche soir, nous nous réunissons pour être enseignés, challengés et envoyés.
             </p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              {
-                emoji: '📖',
-                title: 'La Parole au centre',
-                text: "Chaque session est construite autour de la Bible. Pas d'opinions — des vérités.",
-              },
-              {
-                emoji: '🤝',
-                title: 'La fraternité réelle',
-                text: "On mange ensemble, on joue ensemble, on grandit ensemble. La vie en communauté n'est pas optionnelle.",
-              },
-              {
-                emoji: '🚀',
-                title: "L'envoi en mission",
-                text: "On ne se réunit pas pour se garder entre nous. On se forme pour être envoyés.",
-              },
+              { emoji: '📖', title: 'La Parole au centre', text: "Chaque session est construite autour de la Bible. Pas d'opinions — des vérités." },
+              { emoji: '🤝', title: 'La fraternité réelle', text: "On mange ensemble, on joue ensemble, on grandit ensemble. La vie en communauté n'est pas optionnelle." },
+              { emoji: '🚀', title: "L'envoi en mission", text: "On ne se réunit pas pour se garder entre nous. On se forme pour être envoyés." },
             ].map((item, i) => (
               <div key={i} className="bg-card-hover rounded-2xl p-6 border border-border hover:border-primary/30 transition-all hover:-translate-y-1">
                 <div className="text-4xl mb-4">{item.emoji}</div>
@@ -188,29 +151,6 @@ export default async function VisionPage() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="bg-background px-6 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="text-5xl mb-6">✊</div>
-          <h2 className="text-3xl sm:text-5xl font-black mb-4">
-            Tu veux faire partie<br />de l&apos;histoire ?
-          </h2>
-          <p className="text-muted text-lg mb-8 leading-relaxed">
-            Si tu es un jeune homme qui veut vivre pour quelque chose de plus grand que toi-même, rejoins-nous.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="https://meet.google.com/ppe-fwcd-sbr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-primary text-background px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-light transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/30"
-            >
-              Rejoindre la prochaine session <ArrowRight size={18} />
-            </Link>
-          </div>
-          <p className="text-muted/60 text-sm mt-4">Chaque dimanche à 21h00 · Google Meet</p>
-        </div>
-      </section>
     </div>
   )
 }
