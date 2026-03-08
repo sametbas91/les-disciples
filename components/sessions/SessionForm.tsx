@@ -13,13 +13,13 @@ export default function SessionForm({
 }: {
   members: Member[]
   session: Session | null
-  existingAttendees: { member_id: string; is_first_time: boolean }[]
+  existingAttendees: { member_id: string; is_first_time: boolean; is_late?: boolean }[]
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [allMembers, setAllMembers] = useState(members)
-  const [attendees, setAttendees] = useState<Map<string, boolean>>(
-    new Map(existingAttendees.map((a) => [a.member_id, a.is_first_time]))
+  const [attendees, setAttendees] = useState<Map<string, { is_first_time: boolean; is_late: boolean }>>(
+    new Map(existingAttendees.map((a) => [a.member_id, { is_first_time: a.is_first_time, is_late: a.is_late ?? false }]))
   )
   const [showNewMember, setShowNewMember] = useState(false)
   const [newMemberName, setNewMemberName] = useState('')
@@ -28,13 +28,21 @@ export default function SessionForm({
   const toggleAttendee = (memberId: string) => {
     const next = new Map(attendees)
     if (next.has(memberId)) next.delete(memberId)
-    else next.set(memberId, false)
+    else next.set(memberId, { is_first_time: false, is_late: false })
     setAttendees(next)
   }
 
   const toggleFirstTime = (memberId: string) => {
     const next = new Map(attendees)
-    next.set(memberId, !next.get(memberId))
+    const cur = next.get(memberId)
+    if (cur) next.set(memberId, { ...cur, is_first_time: !cur.is_first_time })
+    setAttendees(next)
+  }
+
+  const toggleLate = (memberId: string) => {
+    const next = new Map(attendees)
+    const cur = next.get(memberId)
+    if (cur) next.set(memberId, { ...cur, is_late: !cur.is_late })
     setAttendees(next)
   }
 
@@ -48,7 +56,7 @@ export default function SessionForm({
       const member = await createMember(fd)
       setAllMembers((prev) => [...prev, member])
       const next = new Map(attendees)
-      next.set(member.id, false)
+      next.set(member.id, { is_first_time: false, is_late: false })
       setAttendees(next)
       setNewMemberName('')
       setShowNewMember(false)
@@ -66,7 +74,7 @@ export default function SessionForm({
     const mins = parseInt(fd.get('duration_minutes') as string || '0')
     fd.set('duration', String(hours * 60 + mins))
     fd.set('attendees', JSON.stringify(
-      Array.from(attendees.entries()).map(([member_id, is_first_time]) => ({ member_id, is_first_time }))
+      Array.from(attendees.entries()).map(([member_id, { is_first_time, is_late }]) => ({ member_id, is_first_time, is_late }))
     ))
     try {
       if (session) {
@@ -207,24 +215,18 @@ export default function SessionForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {disciples.map((m) => (
                 <label key={m.id} className="flex items-center gap-2 bg-card-hover rounded-lg px-3 py-2 cursor-pointer hover:bg-border transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={attendees.has(m.id)}
-                    onChange={() => toggleAttendee(m.id)}
-                    className="accent-primary"
-                  />
+                  <input type="checkbox" checked={attendees.has(m.id)} onChange={() => toggleAttendee(m.id)} className="accent-primary" />
                   <span className="text-sm flex-1">{m.name}</span>
-                  {attendees.has(m.id) && (
-                    <label className="flex items-center gap-1 text-xs text-nouveau cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={attendees.get(m.id) || false}
-                        onChange={() => toggleFirstTime(m.id)}
-                        className="accent-nouveau"
-                      />
-                      1ere fois
+                  {attendees.has(m.id) && (<>
+                    <label className="flex items-center gap-1 text-xs text-nouveau cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={attendees.get(m.id)?.is_first_time || false} onChange={() => toggleFirstTime(m.id)} className="accent-nouveau" />
+                      1ère fois
                     </label>
-                  )}
+                    <label className="flex items-center gap-1 text-xs text-yellow-400 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={attendees.get(m.id)?.is_late || false} onChange={() => toggleLate(m.id)} className="accent-yellow-400" />
+                      Retard
+                    </label>
+                  </>)}
                 </label>
               ))}
             </div>
@@ -234,24 +236,18 @@ export default function SessionForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {invites.map((m) => (
                 <label key={m.id} className="flex items-center gap-2 bg-card-hover rounded-lg px-3 py-2 cursor-pointer hover:bg-border transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={attendees.has(m.id)}
-                    onChange={() => toggleAttendee(m.id)}
-                    className="accent-primary"
-                  />
+                  <input type="checkbox" checked={attendees.has(m.id)} onChange={() => toggleAttendee(m.id)} className="accent-primary" />
                   <span className="text-sm flex-1">{m.name}</span>
-                  {attendees.has(m.id) && (
-                    <label className="flex items-center gap-1 text-xs text-nouveau cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={attendees.get(m.id) || false}
-                        onChange={() => toggleFirstTime(m.id)}
-                        className="accent-nouveau"
-                      />
-                      1ere fois
+                  {attendees.has(m.id) && (<>
+                    <label className="flex items-center gap-1 text-xs text-nouveau cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={attendees.get(m.id)?.is_first_time || false} onChange={() => toggleFirstTime(m.id)} className="accent-nouveau" />
+                      1ère fois
                     </label>
-                  )}
+                    <label className="flex items-center gap-1 text-xs text-yellow-400 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={attendees.get(m.id)?.is_late || false} onChange={() => toggleLate(m.id)} className="accent-yellow-400" />
+                      Retard
+                    </label>
+                  </>)}
                 </label>
               ))}
             </div>

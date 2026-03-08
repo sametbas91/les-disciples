@@ -65,6 +65,7 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
   const discipleAttendances = attendances?.filter((a) => a.member?.status === 'Disciple') || []
   const inviteAttendances = attendances?.filter((a) => a.member?.status !== 'Disciple') || []
   const newAttendances = attendances?.filter((a) => a.is_first_time) || []
+  const lateAttendances = attendances?.filter((a) => (a as typeof a & { is_late?: boolean }).is_late) || []
   const hasAttendances = (attendances?.length || 0) > 0
   const displayDisciples = hasAttendances ? discipleAttendances.length : (session.disciples_count ?? 0)
   const displayInvites = hasAttendances ? inviteAttendances.length : (session.invites_count ?? 0)
@@ -115,7 +116,7 @@ Total presents : ${attendances?.length || 0}`
       </div>
 
       {/* Participation summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="bg-card border border-border rounded-2xl p-4 text-center">
           <p className="text-2xl font-bold text-disciple">{displayDisciples}</p>
           <p className="text-sm text-muted">Disciples</p>
@@ -129,8 +130,12 @@ Total presents : ${attendances?.length || 0}`
           <p className="text-sm text-muted">Nouveaux</p>
         </div>
         <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <p className="text-2xl font-bold text-yellow-400">{lateAttendances.length}</p>
+          <p className="text-sm text-muted">En retard</p>
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4 text-center">
           <p className="text-2xl font-bold text-primary">{displayTotal}</p>
-          <p className="text-sm text-muted">Total pr&eacute;sents</p>
+          <p className="text-sm text-muted">Total</p>
         </div>
       </div>
 

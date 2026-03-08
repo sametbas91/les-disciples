@@ -15,13 +15,13 @@ export default async function NewSessionPage({ searchParams }: { searchParams: P
   const { data: members } = await db.from('members').select('*').order('name')
 
   let session = null
-  let existingAttendees: { member_id: string; is_first_time: boolean }[] = []
+  let existingAttendees: { member_id: string; is_first_time: boolean; is_late: boolean }[] = []
 
   if (edit) {
     const { data } = await db.from('sessions').select('*').eq('id', edit).single()
     session = data
-    const { data: att } = await db.from('attendances').select('member_id, is_first_time').eq('session_id', edit)
-    existingAttendees = att || []
+    const { data: att } = await db.from('attendances').select('member_id, is_first_time, is_late').eq('session_id', edit)
+    existingAttendees = (att || []).map((a) => ({ ...a, is_late: a.is_late ?? false }))
   }
 
   return (

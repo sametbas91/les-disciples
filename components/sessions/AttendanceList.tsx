@@ -1,7 +1,7 @@
 'use client'
 
 import { removeAttendance } from '@/lib/actions'
-import { X, Sparkles } from 'lucide-react'
+import { X, Sparkles, Clock } from 'lucide-react'
 import type { Attendance, Member } from '@/lib/supabase'
 
 type AttendanceWithMember = Attendance & { member: Member }
@@ -25,17 +25,23 @@ export default function AttendanceList({
 
   const renderMember = (a: AttendanceWithMember) => (
     <div key={a.id} className="flex items-center gap-2 bg-card-hover rounded-lg px-3 py-2">
-      <span className="text-sm">{a.member?.name}</span>
+      <span className="text-sm flex-1">{a.member?.name}</span>
       {a.is_first_time && (
         <span className="flex items-center gap-1 text-xs bg-nouveau/20 text-nouveau px-2 py-0.5 rounded-full">
           <Sparkles size={10} />
-          1ere fois
+          1ère fois
+        </span>
+      )}
+      {(a as AttendanceWithMember & { is_late?: boolean }).is_late && (
+        <span className="flex items-center gap-1 text-xs bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-full">
+          <Clock size={10} />
+          Retard
         </span>
       )}
       {isAdmin && (
         <button
           onClick={() => handleRemove(a.member_id)}
-          className="ml-auto text-muted hover:text-red-400 transition-colors"
+          className="text-muted hover:text-red-400 transition-colors"
         >
           <X size={14} />
         </button>

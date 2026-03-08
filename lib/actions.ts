@@ -23,7 +23,7 @@ export async function createSession(formData: FormData) {
   const invitesCountRaw = formData.get('invites_count') as string
   const disciples_count = disciplesCountRaw ? parseInt(disciplesCountRaw) : null
   const invites_count = invitesCountRaw ? parseInt(invitesCountRaw) : null
-  const attendees = JSON.parse(formData.get('attendees') as string) as { member_id: string; is_first_time: boolean }[]
+  const attendees = JSON.parse(formData.get('attendees') as string) as { member_id: string; is_first_time: boolean; is_late: boolean }[]
 
   const { data: session, error } = await db
     .from('sessions')
@@ -39,6 +39,7 @@ export async function createSession(formData: FormData) {
         session_id: session.id,
         member_id: a.member_id,
         is_first_time: a.is_first_time,
+        is_late: a.is_late,
       }))
     )
     if (attError) throw new Error(attError.message)
@@ -60,7 +61,7 @@ export async function updateSession(id: string, formData: FormData) {
   const invitesCountRaw = formData.get('invites_count') as string
   const disciples_count = disciplesCountRaw ? parseInt(disciplesCountRaw) : null
   const invites_count = invitesCountRaw ? parseInt(invitesCountRaw) : null
-  const attendees = JSON.parse(formData.get('attendees') as string) as { member_id: string; is_first_time: boolean }[]
+  const attendees = JSON.parse(formData.get('attendees') as string) as { member_id: string; is_first_time: boolean; is_late: boolean }[]
 
   const { error } = await db.from('sessions').update({ date, theme, duration, disciples_count, invites_count }).eq('id', id)
   if (error) throw new Error(error.message)
@@ -73,6 +74,7 @@ export async function updateSession(id: string, formData: FormData) {
         session_id: id,
         member_id: a.member_id,
         is_first_time: a.is_first_time,
+        is_late: a.is_late,
       }))
     )
   }
