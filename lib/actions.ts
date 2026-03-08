@@ -314,6 +314,57 @@ export async function deleteAudio(sessionId: string) {
   revalidatePath('/sessions')
 }
 
+// SESSION AUDIOS (plusieurs parties par session)
+export async function addSessionAudio(sessionId: string, url: string, label: string, position: number) {
+  await requireAdmin()
+  const db = getServiceSupabase()
+  const { error } = await db.from('session_audios').insert({ session_id: sessionId, url, label, position })
+  if (error) throw new Error(error.message)
+  revalidatePath(`/sessions/${sessionId}`)
+}
+
+export async function deleteSessionAudio(audioId: string, sessionId: string) {
+  await requireAdmin()
+  const db = getServiceSupabase()
+  const { error } = await db.from('session_audios').delete().eq('id', audioId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/sessions/${sessionId}`)
+}
+
+export async function updateSessionAudioLabel(audioId: string, label: string, sessionId: string) {
+  await requireAdmin()
+  const db = getServiceSupabase()
+  const { error } = await db.from('session_audios').update({ label }).eq('id', audioId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/sessions/${sessionId}`)
+}
+
+// DEMANDE D'ACCÈS DRIVE (côté utilisateur)
+export async function requestDriveAccess() {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Non connecté')
+  const db = getServiceSupabase()
+  const { error } = await db
+    .from('profiles')
+    .update({ drive_access_requested: true })
+    .eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/profil')
+}
+
+// DRIVE ACCESS (côté admin)
+export async function toggleDriveAccess(userId: string, value: boolean) {
+  await requireAdmin()
+  const db = getServiceSupabase()
+  const { error } = await db
+    .from('profiles')
+    .update({ drive_access: value, drive_access_requested: false })
+    .eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/profils/${userId}`)
+  revalidatePath(`/admin/profils`)
+}
+
 // ATTENDANCE
 export async function removeAttendance(sessionId: string, memberId: string) {
   await requireAdmin()

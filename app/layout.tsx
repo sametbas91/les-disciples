@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
+import ThemeProvider from "@/components/layout/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Impact Disciple - Dashboard",
@@ -18,10 +19,12 @@ export default function RootLayout({
     <ClerkProvider localization={frFR}>
       <html lang="fr">
         <body className="antialiased min-h-screen">
-          <Navbar />
-          <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-            {children}
-          </main>
+          <ThemeProvider>
+            <Navbar />
+            <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+              {children}
+            </main>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

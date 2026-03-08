@@ -17,10 +17,40 @@
   --font-body: 'Inter', sans-serif;
 }
 
+/* ── Thème sombre (défaut) ── */
+:root {
+  --bg: #0a0a0a;
+  --fg: #f5f0e8;
+  --card: #111111;
+  --card-hover: #1a1a1a;
+  --border: #2a2a2a;
+  --muted: #a89880;
+}
+
+/* ── Thème clair ── */
+html.light {
+  --bg: #f5f0e8;
+  --fg: #1a1208;
+  --card: #ffffff;
+  --card-hover: #f0ebe0;
+  --border: #e0d8cc;
+  --muted: #7a6a55;
+}
+
+html.light {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-body);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 h1, h2, h3, h4 {

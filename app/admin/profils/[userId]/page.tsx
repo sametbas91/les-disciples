@@ -4,6 +4,7 @@ import { getServiceSupabase } from '@/lib/supabase'
 import Image from 'next/image'
 import { User, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import DriveAccessToggle from './DriveAccessToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,6 +79,12 @@ export default async function AdminProfileDetailPage({ params }: { params: Promi
             <p>{profile.birth_date ? new Date(profile.birth_date).toLocaleDateString('fr-FR') : '-'}</p>
           </div>
         </div>
+      </div>
+
+      {/* Accès Drive */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h2 className="font-semibold mb-4">Accès &amp; Permissions</h2>
+        <DriveAccessToggle userId={userId} driveAccess={profile.drive_access ?? false} requested={profile.drive_access_requested ?? false} />
       </div>
     </div>
   )

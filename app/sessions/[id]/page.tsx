@@ -8,7 +8,7 @@ import CommentSection from '@/components/comments/CommentSection'
 import AudioPlayer from '@/components/sessions/AudioPlayer'
 import AudioUpload from '@/components/sessions/AudioUpload'
 import Link from 'next/link'
-import { ArrowLeft, Edit } from 'lucide-react'
+import { ArrowLeft, Edit, FolderOpen, Lock } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +21,20 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
 
   const { data: session } = await db.from('sessions').select('*').eq('id', id).single()
   if (!session) notFound()
+
+  // Vérifier accès Drive
+  let hasDriveAccess = false
+  if (userId) {
+    const { data: profile } = await db.from('profiles').select('drive_access').eq('user_id', userId).single()
+    hasDriveAccess = profile?.drive_access === true
+  }
+
+  // Audios de la session (nouvelle table)
+  const { data: audioParts } = await db
+    .from('session_audios')
+    .select('*')
+    .eq('session_id', id)
+    .order('position', { ascending: true })
 
   const { data: attendances } = await db
     .from('attendances')
@@ -120,12 +134,40 @@ Total presents : ${attendances?.length || 0}`
         </div>
       </div>
 
+      {/* Accès Drive */}
+      {isLoggedIn && (
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+              <FolderOpen size={16} className="text-primary" />
+            </div>
+            <h3 className="font-semibold text-sm">Enregistrements des enseignements</h3>
+          </div>
+          {hasDriveAccess || isAdmin ? (
+            <a
+              href="https://drive.google.com/drive/folders/13-iwK8_uWCL9yZc6FpQAhrdvQeaNlcJr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-primary text-background px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-light transition-colors w-fit"
+            >
+              <FolderOpen size={14} />
+              Accéder au Drive
+            </a>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-muted">
+              <Lock size={14} />
+              <span>Accès en attente de validation par un administrateur</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Audio */}
-      {session.audio_url && (
-        <AudioPlayer url={session.audio_url} isLoggedIn={isLoggedIn} />
+      {(audioParts && audioParts.length > 0) && (
+        <AudioPlayer parts={audioParts} isLoggedIn={isLoggedIn} />
       )}
       {isAdmin && (
-        <AudioUpload sessionId={session.id} currentUrl={session.audio_url} />
+        <AudioUpload sessionId={session.id} existingParts={audioParts || []} />
       )}
 
       {/* Comments */}
