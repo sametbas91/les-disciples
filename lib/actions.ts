@@ -315,10 +315,17 @@ export async function deleteAudio(sessionId: string) {
 }
 
 // SESSION AUDIOS (plusieurs parties par session)
-export async function addSessionAudio(sessionId: string, url: string, label: string, position: number) {
+export async function addSessionAudio(sessionId: string, url: string, title: string, position: number, description?: string) {
   await requireAdmin()
   const db = getServiceSupabase()
-  const { error } = await db.from('session_audios').insert({ session_id: sessionId, url, label, position })
+  const { error } = await db.from('session_audios').insert({
+    session_id: sessionId,
+    url,
+    label: title,
+    title,
+    description: description || null,
+    position,
+  })
   if (error) throw new Error(error.message)
   revalidatePath(`/sessions/${sessionId}`)
 }

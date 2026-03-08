@@ -13,7 +13,7 @@ function formatTime(s: number) {
 
 const speeds = [0.75, 1, 1.25, 1.5, 2]
 
-type AudioPart = { id: string; label: string; url: string; position: number }
+type AudioPart = { id: string; label: string; title?: string | null; description?: string | null; url: string; position: number }
 
 export default function AudioPlayer({
   parts,
@@ -123,14 +123,18 @@ export default function AudioPlayer({
 
   if (!current) return null
 
+  const displayTitle = current.title || current.label
+
   return (
     <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-      {hasParts && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-primary">{current.label}</span>
-          <span className="text-xs text-muted">{partIndex + 1} / {sorted.length}</span>
+      {/* Titre + description */}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="font-semibold text-sm text-primary">{displayTitle}</p>
+          {current.description && <p className="text-xs text-muted mt-0.5">{current.description}</p>}
         </div>
-      )}
+        {hasParts && <span className="text-xs text-muted shrink-0">{partIndex + 1} / {sorted.length}</span>}
+      </div>
 
       <audio ref={audioRef} src={current.url} preload="metadata" />
 

@@ -47,8 +47,9 @@ export default async function DashboardPage() {
       )
     : 0
 
-  // Chart data
-  const chartData = sessions?.map((s) => {
+  // Chart data — seulement à partir du 25/01/2026 (début des enregistrements réels)
+  const CHART_START = new Date('2026-01-25')
+  const chartData = sessions?.filter((s) => new Date(s.date) >= CHART_START).map((s) => {
     const sessionAttendances = attendances?.filter((a) => a.session_id === s.id) || []
     const hasAtt = sessionAttendances.length > 0
     const discipleCount = hasAtt ? sessionAttendances.filter((a) => a.member?.status === 'Disciple').length : (s.disciples_count ?? 0)
