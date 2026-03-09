@@ -126,31 +126,6 @@ export default async function VisionPage() {
         </div>
       </section>
 
-      {/* ── QUI SOMMES-NOUS ── */}
-      <section className="bg-card border-t border-border px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-2">Qui sommes-nous</p>
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Pas un club — une armée</h2>
-            <p className="text-muted max-w-2xl mx-auto leading-relaxed">
-              Impact Disciple est un groupe de jeunes hommes du RGL d&apos;AP Samuel basé en région parisienne. Chaque dimanche soir, nous nous réunissons pour être enseignés, challengés et envoyés.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              { emoji: '📖', title: 'La Parole au centre', text: "Chaque session est construite autour de la Bible. Pas d'opinions — des vérités." },
-              { emoji: '🤝', title: 'La fraternité réelle', text: "On mange ensemble, on joue ensemble, on grandit ensemble. La vie en communauté n'est pas optionnelle." },
-              { emoji: '🚀', title: "L'envoi en mission", text: "On ne se réunit pas pour se garder entre nous. On se forme pour être envoyés." },
-            ].map((item, i) => (
-              <div key={i} className="bg-card-hover rounded-2xl p-6 border border-border hover:border-primary/30 transition-all hover:-translate-y-1">
-                <div className="text-4xl mb-4">{item.emoji}</div>
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-muted text-sm leading-relaxed">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
     </div>
   )

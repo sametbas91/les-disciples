@@ -10,55 +10,35 @@ const photos = [
 
 export default function PhotoMosaic() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
-      {/* Grande photo en haut à gauche (2x2) */}
-      <div className="col-span-2 row-span-2 relative rounded-2xl overflow-hidden" style={{ aspectRatio: '4/3' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photos[0]}
-          alt=""
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-        />
+    <div className="flex flex-col gap-2 md:gap-3">
+      {/* Ligne 1 : grande photo gauche + petite droite */}
+      <div className="flex gap-2 md:gap-3">
+        <div className="flex-[2] relative rounded-2xl overflow-hidden" style={{ aspectRatio: '4/3' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photos[0]} alt="" className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700" />
+        </div>
+        <div className="flex-1 relative rounded-2xl overflow-hidden" style={{ aspectRatio: '3/4' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photos[1]} alt="" className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700" />
+        </div>
       </div>
 
-      {/* Photo 2 */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: '1/1' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photos[1]}
-          alt=""
-          className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
-        />
+      {/* Ligne 2 : petite gauche + grande droite */}
+      <div className="flex gap-2 md:gap-3">
+        <div className="flex-1 relative rounded-2xl overflow-hidden" style={{ aspectRatio: '3/4' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photos[2]} alt="" className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700" />
+        </div>
+        <div className="flex-[2] relative rounded-2xl overflow-hidden" style={{ aspectRatio: '4/3' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photos[3]} alt="" className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700" />
+        </div>
       </div>
 
-      {/* Photo 3 */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: '1/1' }}>
+      {/* Ligne 3 : photo pleine largeur */}
+      <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: '21/9' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photos[2]}
-          alt=""
-          className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
-        />
-      </div>
-
-      {/* Photo 4 — large en bas */}
-      <div className="col-span-1 md:col-span-2 relative rounded-2xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photos[3]}
-          alt=""
-          className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
-        />
-      </div>
-
-      {/* Photo 5 */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: '1/1' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photos[4]}
-          alt=""
-          className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
-        />
+        <img src={photos[4]} alt="" className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700" />
       </div>
     </div>
   )

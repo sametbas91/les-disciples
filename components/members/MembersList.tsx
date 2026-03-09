@@ -79,7 +79,7 @@ export default function MembersList({
           </div>
           {isLoggedIn && (
             <div className="flex items-center gap-3 mt-2 text-sm text-muted">
-              <span className="shrink-0 text-xs">{m.sessionsAttendedLast6}/{last6Count} dernières</span>
+              <span className="shrink-0 text-xs">{m.sessionsAttendedLast6}/{last6Count} séances</span>
               <div className="flex-1 max-w-[100px] bg-border rounded-full h-2">
                 <div
                   className="h-2 rounded-full transition-all"

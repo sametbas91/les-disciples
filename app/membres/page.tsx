@@ -16,35 +16,28 @@ export default async function MembresPage() {
 
   const totalSessions = sessions?.length || 0
 
-  // 6 dernières séances (fenêtre glissante)
-  const last6Sessions = sessions?.slice(-6) || []
-  const last6Ids = new Set(last6Sessions.map((s) => s.id))
-  const last6Count = last6Sessions.length
+  // Toutes les séances (fenêtre dynamique)
+  const allSessionIds = new Set((sessions || []).map((s) => s.id))
+  const totalSessionCount = sessions?.length || 0
 
-  // Stats globales (pour "séances assistées" au total)
+  // Stats sur toutes les séances
   const memberStatsTotal = new Map<string, number>()
   attendances?.forEach((a) => {
     memberStatsTotal.set(a.member_id, (memberStatsTotal.get(a.member_id) || 0) + 1)
   })
 
-  // Stats sur les 6 dernières
-  const memberStatsLast6 = new Map<string, number>()
-  attendances?.filter((a) => last6Ids.has(a.session_id)).forEach((a) => {
-    memberStatsLast6.set(a.member_id, (memberStatsLast6.get(a.member_id) || 0) + 1)
-  })
-
   const membersWithStats = (members || []).map((m) => ({
     ...m,
     sessionsAttended: memberStatsTotal.get(m.id) || 0,
-    sessionsAttendedLast6: memberStatsLast6.get(m.id) || 0,
-    attendanceRate: last6Count > 0 ? Math.round(((memberStatsLast6.get(m.id) || 0) / last6Count) * 100) : 0,
+    sessionsAttendedLast6: memberStatsTotal.get(m.id) || 0,
+    attendanceRate: totalSessionCount > 0 ? Math.round(((memberStatsTotal.get(m.id) || 0) / totalSessionCount) * 100) : 0,
     isNew: (memberStatsTotal.get(m.id) || 0) <= 3 && (memberStatsTotal.get(m.id) || 0) > 0,
   }))
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl sm:text-3xl font-bold">Membres</h1>
-      <MembersList members={membersWithStats} isAdmin={isAdmin} totalSessions={totalSessions} last6Count={last6Count} isLoggedIn={isLoggedIn} />
+      <MembersList members={membersWithStats} isAdmin={isAdmin} totalSessions={totalSessions} last6Count={totalSessionCount} isLoggedIn={isLoggedIn} />
     </div>
   )
 }
