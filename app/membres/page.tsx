@@ -16,28 +16,30 @@ export default async function MembresPage() {
 
   const totalSessions = sessions?.length || 0
 
-  // Toutes les séances (fenêtre dynamique)
-  const allSessionIds = new Set((sessions || []).map((s) => s.id))
-  const totalSessionCount = sessions?.length || 0
+  // Séances qui ont au moins une présence enregistrée (séances recensées)
+  const sessionsWithAttendance = new Set(attendances?.map((a) => a.session_id) || [])
+  const recensedCount = sessionsWithAttendance.size
 
-  // Stats sur toutes les séances
-  const memberStatsTotal = new Map<string, number>()
+  // Présences par membre (uniquement sur les séances recensées)
+  const memberStats = new Map<string, number>()
   attendances?.forEach((a) => {
-    memberStatsTotal.set(a.member_id, (memberStatsTotal.get(a.member_id) || 0) + 1)
+    if (sessionsWithAttendance.has(a.session_id)) {
+      memberStats.set(a.member_id, (memberStats.get(a.member_id) || 0) + 1)
+    }
   })
 
   const membersWithStats = (members || []).map((m) => ({
     ...m,
-    sessionsAttended: memberStatsTotal.get(m.id) || 0,
-    sessionsAttendedLast6: memberStatsTotal.get(m.id) || 0,
-    attendanceRate: totalSessionCount > 0 ? Math.round(((memberStatsTotal.get(m.id) || 0) / totalSessionCount) * 100) : 0,
-    isNew: (memberStatsTotal.get(m.id) || 0) <= 3 && (memberStatsTotal.get(m.id) || 0) > 0,
+    sessionsAttended: memberStats.get(m.id) || 0,
+    sessionsAttendedLast6: memberStats.get(m.id) || 0,
+    attendanceRate: recensedCount > 0 ? Math.round(((memberStats.get(m.id) || 0) / recensedCount) * 100) : 0,
+    isNew: (memberStats.get(m.id) || 0) <= 3 && (memberStats.get(m.id) || 0) > 0,
   }))
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl sm:text-3xl font-bold">Membres</h1>
-      <MembersList members={membersWithStats} isAdmin={isAdmin} totalSessions={totalSessions} last6Count={totalSessionCount} isLoggedIn={isLoggedIn} />
+      <MembersList members={membersWithStats} isAdmin={isAdmin} totalSessions={totalSessions} last6Count={recensedCount} isLoggedIn={isLoggedIn} />
     </div>
   )
 }
