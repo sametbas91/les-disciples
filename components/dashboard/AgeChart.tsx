@@ -82,7 +82,10 @@ export default function AgeChart({ data }: { data: MemberAge[] }) {
             position: 'right',
             fill: '#a89880',
             fontSize: 12,
-            formatter: (v: number) => v > 1 ? `${v} membres` : `${v} membre`,
+            formatter: (v: unknown) => {
+              const n = Number(v)
+              return n > 1 ? `${n} membres` : `${n} membre`
+            },
           }}
         >
           {grouped.map((entry, i) => (
